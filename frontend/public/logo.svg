@@ -1,0 +1,17 @@
+<svg width="120" height="40" viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Gold Crown Icon -->
+  <g transform="translate(5, 8)">
+    <!-- Crown -->
+    <path d="M2 14 L6 6 L10 10 L14 6 L18 14 L2 14 Z" fill="#C9A961" stroke="#B89650" stroke-width="1"/>
+    <rect x="2" y="14" width="16" height="4" fill="#C9A961" stroke="#B89650" stroke-width="1"/>
+    <!-- Gems -->
+    <circle cx="10" cy="10" r="1.5" fill="#FFD700"/>
+    <circle cx="6" cy="6" r="1" fill="#FFD700"/>
+    <circle cx="14" cy="6" r="1" fill="#FFD700"/>
+  </g>
+
+  <!-- Text -->
+  <text x="35" y="26" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#C9A961">
+    The Nail Hubs
+  </text>
+</svg>

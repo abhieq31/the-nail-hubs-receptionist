@@ -1,0 +1,16 @@
+{
+  "short_name": "The Nail Hubs",
+  "name": "The Nail Hubs - A Touch Of Elegance",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#C9A961",
+  "background_color": "#1a1a1a",
+  "description": "Ankleshwar's Premier Luxury Nail Salon - Book appointments for gel nails, acrylics, extensions, and bridal nail art"
+}
