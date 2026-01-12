@@ -3,12 +3,14 @@ Database setup and models for The Nail Hubs
 """
 
 import sqlite3
+import os
 from datetime import datetime
 from contextlib import contextmanager
 from typing import Optional, List, Dict
 import secrets
 
-DB_PATH = "nail_hubs.db"
+# Use /tmp for Vercel serverless environment (ephemeral storage)
+DB_PATH = os.getenv("DB_PATH", "/tmp/nail_hubs.db")
 
 
 def init_database():
