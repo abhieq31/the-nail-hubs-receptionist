@@ -50,10 +50,18 @@ function App() {
           </p>
           <div className="hero-buttons">
             <button className="btn-primary" onClick={() => setIsOpen(true)}>
-              Book Appointment
+              📅 Book Appointment
             </button>
+            <a
+              href="https://www.whatsapp.com/channel/0029Vb6wVqy7T8bahzFZwV1d"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-whatsapp"
+            >
+              📢 Join WhatsApp Channel
+            </a>
             <button className="btn-secondary" onClick={() => scrollToSection('services')}>
-              View Services
+              💅 View Services
             </button>
           </div>
           <div className="hero-features">
@@ -438,30 +446,54 @@ function App() {
               <div className="footer-column">
                 <h4>Quick Links</h4>
                 <ul>
-                  <li><a href="#home" onClick={() => scrollToSection('home')}>Home</a></li>
-                  <li><a href="#services" onClick={() => scrollToSection('services')}>Services</a></li>
-                  <li><a href="#gallery" onClick={() => scrollToSection('gallery')}>Gallery</a></li>
-                  <li><a href="#about" onClick={() => scrollToSection('about')}>About</a></li>
+                  <li><a href="#home" onClick={() => scrollToSection('home')}>🏠 Home</a></li>
+                  <li><a href="#services" onClick={() => scrollToSection('services')}>💅 Services</a></li>
+                  <li><a href="#gallery" onClick={() => scrollToSection('gallery')}>📸 Gallery</a></li>
+                  <li><a href="#about" onClick={() => scrollToSection('about')}>ℹ️ About</a></li>
                 </ul>
               </div>
 
               <div className="footer-column">
                 <h4>Services</h4>
                 <ul>
-                  <li>Gel Nails</li>
-                  <li>Acrylic Nails</li>
-                  <li>Nail Extensions</li>
-                  <li>Bridal Nail Art</li>
+                  <li>✨ Gel Nails</li>
+                  <li>💎 Acrylic Nails</li>
+                  <li>🌟 Nail Extensions</li>
+                  <li>👰 Bridal Nail Art</li>
                 </ul>
               </div>
 
               <div className="footer-column">
                 <h4>Contact</h4>
                 <ul>
-                  <li>📍 Garden City, Ankleshwar</li>
-                  <li>📞 07698 235501</li>
-                  <li>🕐 Mon-Sat: 11 AM - 6 PM</li>
+                  <li>
+                    <a href="https://www.google.com/maps?q=The+Nail+Hubs,+b-292+gardencity+,gidc+ankleshwer+pin:-393001,+Ankleshwar,+Gujarat+393001&ftid=0x3be0237ec798dc17:0xbe20ebcb0a43670a" target="_blank" rel="noopener noreferrer">
+                      📍 Garden City, Ankleshwar
+                    </a>
+                  </li>
+                  <li>
+                    <a href="tel:+917698235501">
+                      📞 07698 235501
+                    </a>
+                  </li>
+                  <li>🕐 Open All 7 Days</li>
+                  <li>⏰ 11 AM - 6 PM</li>
                 </ul>
+              </div>
+
+              <div className="footer-column">
+                <h4>Follow Us</h4>
+                <div className="social-links">
+                  <a href="https://www.instagram.com/thenailhubs/" target="_blank" rel="noopener noreferrer" className="social-icon">
+                    📸 Instagram
+                  </a>
+                  <a href="https://www.whatsapp.com/channel/0029Vb6wVqy7T8bahzFZwV1d" target="_blank" rel="noopener noreferrer" className="social-icon">
+                    📢 WhatsApp Channel
+                  </a>
+                  <a href="https://wa.me/917698235501" target="_blank" rel="noopener noreferrer" className="social-icon">
+                    💬 Chat on WhatsApp
+                  </a>
+                </div>
               </div>
             </div>
           </div>

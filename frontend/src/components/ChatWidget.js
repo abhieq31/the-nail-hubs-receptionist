@@ -53,8 +53,22 @@ function ChatWidget({ isOpen, onClose }) {
       setMessages([
         {
           sender: 'bot',
-          text: 'Hi ✨ Welcome to The Nail Hubs! Our online booking system is currently being updated. Please call or WhatsApp us at 07698 235501 to book your appointment. We are open all 7 days from 11 AM to 6 PM!',
+          text: 'Hi ✨ Welcome to The Nail Hubs!\n\n💅 Ready to get gorgeous nails? Book your appointment now!\n\n🕐 Open All 7 Days: 11 AM - 6 PM\n📍 B-292, Garden City, Ankleshwar\n\nChoose your booking method:',
           timestamp: new Date(),
+        },
+      ]);
+      setOptions([
+        {
+          label: '📱 Book via WhatsApp',
+          value: 'whatsapp_book',
+        },
+        {
+          label: '📞 Call Us',
+          value: 'call',
+        },
+        {
+          label: '📢 Join WhatsApp Channel',
+          value: 'whatsapp_channel',
         },
       ]);
     }
@@ -118,6 +132,19 @@ function ChatWidget({ isOpen, onClose }) {
   };
 
   const handleOptionClick = (option) => {
+    // Handle special actions
+    if (option === 'whatsapp_book') {
+      window.open('https://wa.me/917698235501?text=Hello%2C%20I%20would%20like%20to%20book.%0A%0AName%3A%0ADate%3A%0ATime%3A%0AHow%20many%20people%3A', '_blank');
+      return;
+    }
+    if (option === 'call') {
+      window.open('tel:+917698235501', '_self');
+      return;
+    }
+    if (option === 'whatsapp_channel') {
+      window.open('https://www.whatsapp.com/channel/0029Vb6wVqy7T8bahzFZwV1d', '_blank');
+      return;
+    }
     sendMessage(option);
   };
 

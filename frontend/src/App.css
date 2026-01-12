@@ -330,6 +330,29 @@ body {
   box-shadow: var(--shadow-gold);
 }
 
+.btn-whatsapp {
+  padding: 18px 40px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s;
+  background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+  color: white;
+  border: 2px solid #25D366;
+  box-shadow: 0 8px 25px rgba(37, 211, 102, 0.4);
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+}
+
+.btn-whatsapp:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 35px rgba(37, 211, 102, 0.6);
+  background: #25D366;
+}
+
 .hero-features {
   display: flex;
   gap: 40px;
@@ -1137,13 +1160,14 @@ body {
 
 .footer-links {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 40px;
 }
 
 .footer-column h4 {
   margin-bottom: 20px;
   font-size: 1.2rem;
+  color: var(--primary-gold);
 }
 
 .footer-column ul {
@@ -1153,16 +1177,45 @@ body {
 .footer-column li {
   margin-bottom: 12px;
   opacity: 0.8;
-  transition: opacity 0.3s;
+  transition: all 0.3s;
 }
 
 .footer-column a {
   color: white;
   text-decoration: none;
+  transition: all 0.3s;
 }
 
 .footer-column li:hover {
   opacity: 1;
+  transform: translateX(5px);
+}
+
+.footer-column a:hover {
+  color: var(--primary-gold);
+}
+
+.social-links {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.social-icon {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  background: rgba(201, 169, 97, 0.1);
+  border-radius: 8px;
+  transition: all 0.3s;
+  color: white;
+  text-decoration: none;
+}
+
+.social-icon:hover {
+  background: rgba(201, 169, 97, 0.2);
+  transform: translateX(5px);
+  color: var(--primary-gold);
 }
 
 .footer-bottom {
@@ -1305,7 +1358,7 @@ body {
     gap: 15px;
   }
 
-  .btn-primary, .btn-secondary {
+  .btn-primary, .btn-secondary, .btn-whatsapp {
     padding: 15px 30px;
     font-size: 1.1rem;
     width: 100%;
@@ -1419,7 +1472,7 @@ body {
   }
 
   .footer-links {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 30px;
   }
 
