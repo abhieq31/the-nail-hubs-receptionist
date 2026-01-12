@@ -1623,3 +1623,293 @@ body {
     padding: 0 15px;
   }
 }
+
+/* ============================================
+   LUXURY ANIMATIONS FOR NAIL SALON
+   ============================================ */
+
+/* Shimmer effect for gold elements */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+/* Elegant glow pulse */
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(201, 169, 97, 0.3),
+                0 0 40px rgba(201, 169, 97, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(201, 169, 97, 0.5),
+                0 0 60px rgba(201, 169, 97, 0.3),
+                0 0 80px rgba(201, 169, 97, 0.1);
+  }
+}
+
+/* Smooth slide in from left */
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Smooth slide in from right */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Scale in animation */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Bounce subtle */
+@keyframes bounceSubtle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Rotate glow */
+@keyframes rotateGlow {
+  0% {
+    filter: drop-shadow(0 0 10px rgba(201, 169, 97, 0.5));
+    transform: rotate(0deg);
+  }
+  50% {
+    filter: drop-shadow(0 0 20px rgba(201, 169, 97, 0.8));
+  }
+  100% {
+    filter: drop-shadow(0 0 10px rgba(201, 169, 97, 0.5));
+    transform: rotate(360deg);
+  }
+}
+
+/* Gradient shine animation */
+@keyframes gradientShine {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Apply animations to elements */
+.service-card {
+  animation: slideInLeft 0.6s ease-out;
+  animation-fill-mode: both;
+}
+
+.service-card:nth-child(1) { animation-delay: 0.1s; }
+.service-card:nth-child(2) { animation-delay: 0.2s; }
+.service-card:nth-child(3) { animation-delay: 0.3s; }
+.service-card:nth-child(4) { animation-delay: 0.4s; }
+.service-card:nth-child(5) { animation-delay: 0.5s; }
+.service-card:nth-child(6) { animation-delay: 0.6s; }
+
+.service-card:hover {
+  animation: glow-pulse 2s infinite;
+}
+
+.logo-image {
+  animation: float 3s ease-in-out infinite;
+}
+
+.salon-name {
+  background: linear-gradient(90deg, #C9A961, #FFD700, #C9A961, #B89650);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradientShine 3s ease infinite;
+}
+
+.section-title::after {
+  animation: shimmer 3s infinite;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(201, 169, 97, 0.5) 25%,
+    var(--primary-gold) 50%,
+    rgba(201, 169, 97, 0.5) 75%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+}
+
+.btn-primary, .btn-secondary, .btn-whatsapp {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::before,
+.btn-secondary::before,
+.btn-whatsapp::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.btn-primary:hover::before,
+.btn-secondary:hover::before,
+.btn-whatsapp:hover::before {
+  left: 100%;
+}
+
+.floating-book-button {
+  animation: bounceSubtle 2s ease-in-out infinite;
+}
+
+.floating-book-button:hover {
+  animation: glow-pulse 1.5s infinite;
+}
+
+.feature-item {
+  animation: scaleIn 0.5s ease-out;
+  animation-fill-mode: both;
+}
+
+.feature-item:nth-child(1) { animation-delay: 0.7s; }
+.feature-item:nth-child(2) { animation-delay: 0.8s; }
+.feature-item:nth-child(3) { animation-delay: 0.9s; }
+
+.instagram-post-card,
+.contact-card,
+.highlight-item {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.instagram-post-card:hover,
+.contact-card:hover,
+.highlight-item:hover {
+  transform: translateY(-10px) scale(1.03);
+}
+
+.nav-menu a {
+  position: relative;
+}
+
+.nav-menu a::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--primary-gold);
+  transition: width 0.3s ease;
+}
+
+.nav-menu a:hover::after {
+  width: 100%;
+}
+
+.footer-logo-image {
+  animation: rotateGlow 10s linear infinite;
+}
+
+.social-icon {
+  position: relative;
+  overflow: hidden;
+}
+
+.social-icon::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(201, 169, 97, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.5s, height 0.5s;
+}
+
+.social-icon:hover::before {
+  width: 200%;
+  height: 200%;
+}
+
+/* Scroll reveal animation */
+@keyframes revealOnScroll {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.section-header {
+  animation: revealOnScroll 0.8s ease-out;
+}
+
+/* Sparkle effect for premium elements */
+@keyframes sparkleEffect {
+  0%, 100% {
+    text-shadow: 0 0 5px rgba(201, 169, 97, 0.5),
+                 0 0 10px rgba(201, 169, 97, 0.3);
+  }
+  50% {
+    text-shadow: 0 0 10px rgba(201, 169, 97, 0.8),
+                 0 0 20px rgba(201, 169, 97, 0.5),
+                 0 0 30px rgba(201, 169, 97, 0.3);
+  }
+}
+
+.hero-title {
+  animation: fadeInDown 1s ease-out, sparkleEffect 3s ease-in-out infinite;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .service-card {
+    animation: fadeInUp 0.5s ease-out;
+  }
+
+  .floating-book-button {
+    animation: bounceSubtle 2s ease-in-out infinite, glow-pulse 3s infinite;
+  }
+}
