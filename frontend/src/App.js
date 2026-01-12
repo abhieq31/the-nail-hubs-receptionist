@@ -481,6 +481,13 @@ function App() {
           <div className="about-content">
             <div className="about-text">
               <h2 className="section-title">About The Nail Hubs</h2>
+
+              {/* Women-Owned Business Badge */}
+              <div className="women-owned-badge">
+                <span className="badge-icon">💜</span>
+                <span className="badge-text">Proudly Women-Owned Business</span>
+              </div>
+
               <p className="about-description">
                 Welcome to The Nail Hubs, Ankleshwar's premier destination for luxury nail care.
                 We specialize in creating stunning nail art and providing top-tier nail services
@@ -510,6 +517,7 @@ function App() {
               <div className="why-choose">
                 <h3>Why Choose Us?</h3>
                 <ul className="why-list">
+                  <li><span className="check-icon">✓</span> Women-owned and operated</li>
                   <li><span className="check-icon">✓</span> Certified nail technicians</li>
                   <li><span className="check-icon">✓</span> Premium quality products</li>
                   <li><span className="check-icon">✓</span> Hygienic and sanitized tools</li>

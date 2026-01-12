@@ -909,6 +909,58 @@ body {
   padding-right: 20px;
 }
 
+.women-owned-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 25px;
+  background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+  border-radius: 50px;
+  margin-bottom: 25px;
+  box-shadow: 0 5px 20px rgba(155, 89, 182, 0.3);
+  transition: all 0.3s ease;
+  animation: pulse-badge 3s ease-in-out infinite;
+}
+
+.women-owned-badge:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(155, 89, 182, 0.5);
+}
+
+@keyframes pulse-badge {
+  0%, 100% {
+    box-shadow: 0 5px 20px rgba(155, 89, 182, 0.3);
+  }
+  50% {
+    box-shadow: 0 8px 30px rgba(155, 89, 182, 0.5);
+  }
+}
+
+.badge-icon {
+  font-size: 1.5rem;
+  animation: heartbeat 1.5s ease-in-out infinite;
+}
+
+@keyframes heartbeat {
+  0%, 100% {
+    transform: scale(1);
+  }
+  10%, 30% {
+    transform: scale(1.1);
+  }
+  20%, 40% {
+    transform: scale(1);
+  }
+}
+
+.badge-text {
+  color: white;
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
 .about-description {
   font-size: 1.1rem;
   line-height: 1.8;
@@ -1511,6 +1563,19 @@ body {
 
   .about-section {
     padding: 60px 0;
+  }
+
+  .women-owned-badge {
+    padding: 10px 20px;
+    font-size: 0.95rem;
+  }
+
+  .badge-icon {
+    font-size: 1.3rem;
+  }
+
+  .badge-text {
+    font-size: 0.95rem;
   }
 
   .about-highlights {
