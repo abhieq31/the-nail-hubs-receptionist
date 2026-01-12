@@ -112,9 +112,9 @@ function App() {
           <div className="services-grid">
             <div className="service-card featured">
               <div className="popular-badge">Most Popular</div>
-              <div className="service-icon">✨</div>
+              <div className="service-icon">💅</div>
               <h3>Acrylic Nails</h3>
-              <p className="service-duration">90 minutes</p>
+              <p className="service-duration">100–120 minutes</p>
               <p className="service-description">
                 Durable acrylic extensions for strength and length with custom shapes
               </p>
@@ -123,15 +123,12 @@ function App() {
                 <li>Extra durability</li>
                 <li>Perfect for special events</li>
               </ul>
-              <button className="service-book-btn" onClick={openWhatsAppBooking}>
-                📱 Book Now
-              </button>
             </div>
 
             <div className="service-card">
               <div className="service-icon">🎨</div>
               <h3>Nail Art</h3>
-              <p className="service-duration">60-120 minutes</p>
+              <p className="service-duration">75–120 minutes</p>
               <p className="service-description">
                 Creative and intricate nail art designs customized to your style
               </p>
@@ -140,15 +137,12 @@ function App() {
                 <li>Hand-painted artwork</li>
                 <li>Trending styles</li>
               </ul>
-              <button className="service-book-btn" onClick={openWhatsAppBooking}>
-                📱 Book Now
-              </button>
             </div>
 
             <div className="service-card">
               <div className="service-icon">💎</div>
               <h3>Nail Extensions</h3>
-              <p className="service-duration">90 minutes</p>
+              <p className="service-duration">90–110 minutes</p>
               <p className="service-description">
                 Beautiful nail extensions that look natural and feel comfortable
               </p>
@@ -157,15 +151,12 @@ function App() {
                 <li>Various lengths available</li>
                 <li>Lightweight feel</li>
               </ul>
-              <button className="service-book-btn" onClick={openWhatsAppBooking}>
-                📱 Book Now
-              </button>
             </div>
 
             <div className="service-card">
-              <div className="service-icon">🎭</div>
+              <div className="service-icon">✨</div>
               <h3>Nail Decals</h3>
-              <p className="service-duration">30 minutes</p>
+              <p className="service-duration">25–35 minutes</p>
               <p className="service-description">
                 Stylish nail decals for quick and easy nail decoration
               </p>
@@ -174,15 +165,12 @@ function App() {
                 <li>Easy application</li>
                 <li>Long-lasting</li>
               </ul>
-              <button className="service-book-btn" onClick={openWhatsAppBooking}>
-                📱 Book Now
-              </button>
             </div>
 
             <div className="service-card">
               <div className="service-icon">💅</div>
               <h3>Nail Polish Changes</h3>
-              <p className="service-duration">30 minutes</p>
+              <p className="service-duration">25–30 minutes</p>
               <p className="service-description">
                 Quick polish changes with our premium color collection
               </p>
@@ -191,15 +179,12 @@ function App() {
                 <li>Premium brands</li>
                 <li>Perfect finish</li>
               </ul>
-              <button className="service-book-btn" onClick={openWhatsAppBooking}>
-                📱 Book Now
-              </button>
             </div>
 
             <div className="service-card">
-              <div className="service-icon">🎨</div>
+              <div className="service-icon">🖌️</div>
               <h3>Nail Painting & Designs</h3>
-              <p className="service-duration">45-90 minutes</p>
+              <p className="service-duration">60–90 minutes</p>
               <p className="service-description">
                 Hand-painted nail designs from simple to elaborate patterns
               </p>
@@ -208,15 +193,12 @@ function App() {
                 <li>Artistic designs</li>
                 <li>Personal consultation</li>
               </ul>
-              <button className="service-book-btn" onClick={openWhatsAppBooking}>
-                📱 Book Now
-              </button>
             </div>
 
             <div className="service-card">
               <div className="service-icon">🔧</div>
               <h3>Nail Repair</h3>
-              <p className="service-duration">30 minutes</p>
+              <p className="service-duration">20–30 minutes</p>
               <p className="service-description">
                 Professional repair service for damaged or broken nails
               </p>
@@ -225,9 +207,6 @@ function App() {
                 <li>Seamless repair</li>
                 <li>Restore natural look</li>
               </ul>
-              <button className="service-book-btn" onClick={openWhatsAppBooking}>
-                📱 Book Now
-              </button>
             </div>
           </div>
         </div>
