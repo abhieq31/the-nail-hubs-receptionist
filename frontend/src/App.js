@@ -522,11 +522,13 @@ function App() {
         </div>
       </footer>
 
-      {/* Floating Book Button */}
-      <button className="floating-book-button" onClick={openWhatsAppBooking}>
-        <span className="book-icon">📱</span>
-        <span className="book-text">Book on WhatsApp</span>
-      </button>
+      {/* Floating Chat Button */}
+      {!isOpen && (
+        <button className="floating-book-button" onClick={() => setIsOpen(true)}>
+          <span className="book-icon">💬</span>
+          <span className="book-text">Chat with Us</span>
+        </button>
+      )}
 
       {/* Chat Widget */}
       <ChatWidget isOpen={isOpen} onClose={() => setIsOpen(false)} />
