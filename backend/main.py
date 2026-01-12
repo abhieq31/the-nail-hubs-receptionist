@@ -19,10 +19,12 @@ from agent import NailHubsAgent
 from ai_agent import AIReceptionistAgent
 from business_rules import SERVICES, BUSINESS_NAME
 
-# Initialize database
-init_database()
-
 app = FastAPI(title=f"{BUSINESS_NAME} Booking API")
+
+# Initialize database on startup (lazy init for serverless)
+@app.on_event("startup")
+async def startup_event():
+    init_database()
 
 # CORS middleware for frontend
 app.add_middleware(
