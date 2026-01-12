@@ -336,10 +336,21 @@ function App() {
             </div>
 
             <div className="about-image">
-              <div className="about-placeholder">
-                <span className="placeholder-icon">💅</span>
-                <p>Luxury Nail Care</p>
-              </div>
+              <iframe
+                src="https://www.instagram.com/p/C_Nzu25CnYd/embed"
+                width="100%"
+                height="600"
+                frameBorder="0"
+                scrolling="no"
+                allowTransparency="true"
+                title="Instagram Reel"
+                style={{
+                  background: 'white',
+                  borderRadius: '20px',
+                  border: '2px solid var(--primary-gold)',
+                  boxShadow: '0 10px 40px rgba(201, 169, 97, 0.2)'
+                }}
+              />
             </div>
           </div>
         </div>
@@ -375,9 +386,9 @@ function App() {
               <div className="contact-card">
                 <div className="contact-icon">🕐</div>
                 <h3>Hours</h3>
-                <p><strong>Monday - Saturday</strong></p>
+                <p><strong>Open All 7 Days</strong></p>
                 <p>11:00 AM - 6:00 PM</p>
-                <p><strong>Sunday:</strong> Closed</p>
+                <p>Monday - Sunday</p>
               </div>
 
               <div className="contact-card">
@@ -391,18 +402,22 @@ function App() {
             </div>
 
             <div className="map-container">
-              <div className="map-placeholder">
-                <span className="map-icon">🗺️</span>
-                <p>Garden City, Ankleshwar</p>
-                <a
-                  href="https://maps.google.com/?q=B-292,Garden+City,Ankleshwar"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="directions-btn"
-                >
-                  Get Directions
-                </a>
-              </div>
+              <iframe
+                src="https://www.instagram.com/p/C4umxKdgbNw/embed"
+                width="100%"
+                height="100%"
+                frameBorder="0"
+                scrolling="no"
+                allowTransparency="true"
+                title="Instagram Post"
+                style={{
+                  background: 'white',
+                  minHeight: '500px',
+                  borderRadius: '15px',
+                  border: '2px solid var(--primary-gold)',
+                  boxShadow: '0 10px 40px rgba(201, 169, 97, 0.2)'
+                }}
+              />
             </div>
           </div>
         </div>
