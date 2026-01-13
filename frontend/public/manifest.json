@@ -3,9 +3,14 @@
   "name": "The Nail Hubs - A Touch Of Elegance",
   "icons": [
     {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "src": "logo.jpg",
+      "sizes": "740x740",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
     }
   ],
   "start_url": ".",
