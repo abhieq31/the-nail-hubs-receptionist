@@ -1,23 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import ChatWidget from './components/ChatWidget';
 import './App.css';
-import { Analytics } from "@vercel/analytics/react"
+
+// Constants
+const WHATSAPP_BOOKING_URL = 'https://wa.me/917698235501?text=Hello%2C%20I%20would%20like%20to%20book.%0A%0AName%3A%0ADate%3A%0ATime%3A%0AHow%20many%20people%3A';
 
 function App() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const scrollToSection = (id) => {
+  const scrollToSection = useCallback((id) => {
     const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
-      setMobileMenuOpen(false); // Close mobile menu after navigation
+      setIsMobileMenuOpen(false);
     }
-  };
+  }, []);
 
-  const openWhatsAppBooking = () => {
-    window.open('https://wa.me/917698235501?text=Hello%2C%20I%20would%20like%20to%20book.%0A%0AName%3A%0ADate%3A%0ATime%3A%0AHow%20many%20people%3A', '_blank');
-  };
+  const openWhatsAppBooking = useCallback(() => {
+    window.open(WHATSAPP_BOOKING_URL, '_blank');
+  }, []);
 
   return (
     <div className="App">
@@ -32,14 +35,14 @@ function App() {
           {/* Mobile Menu Button */}
           <button
             className="mobile-menu-btn"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Toggle menu"
           >
-            {mobileMenuOpen ? '✕' : '☰'}
+            {isMobileMenuOpen ? '✕' : '☰'}
           </button>
 
           {/* Navigation Menu */}
-          <ul className={`nav-menu ${mobileMenuOpen ? 'mobile-open' : ''}`}>
+          <ul className={`nav-menu ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
             <li><a href="#home" onClick={() => scrollToSection('home')}>Home</a></li>
             <li><a href="#services" onClick={() => scrollToSection('services')}>Services</a></li>
             <li><a href="#gallery" onClick={() => scrollToSection('gallery')}>Gallery</a></li>
@@ -90,11 +93,11 @@ function App() {
             </div>
             <div className="feature-item">
               <span className="feature-icon">💅</span>
-              <span>Certified Nail Technicians</span>
+              <span>5+ Years Experience</span>
             </div>
             <div className="feature-item">
               <span className="feature-icon">✨</span>
-              <span>Premium International Products</span>
+              <span>Premium Products</span>
             </div>
             <div className="feature-item">
               <span className="feature-icon">🎨</span>
@@ -462,9 +465,9 @@ function App() {
                 in a relaxing, elegant environment.
               </p>
               <p className="about-description">
-                Our team of expert nail artists brings years of experience and a passion for
-                perfection to every appointment. We use only premium, internationally-certified
-                products to ensure the health and beauty of your nails.
+                Our team brings years of experience and a passion for perfection to every
+                appointment. We use only premium quality products to ensure the health and
+                beauty of your nails.
               </p>
 
               <div className="about-highlights">
@@ -486,7 +489,7 @@ function App() {
                 <h3>Why Choose Us?</h3>
                 <ul className="why-list">
                   <li><span className="check-icon">✓</span> Women-owned and operated</li>
-                  <li><span className="check-icon">✓</span> Certified nail technicians</li>
+                  <li><span className="check-icon">✓</span> 5+ years of experience</li>
                   <li><span className="check-icon">✓</span> Premium quality products</li>
                   <li><span className="check-icon">✓</span> Hygienic and sanitized tools</li>
                   <li><span className="check-icon">✓</span> Relaxing ambiance</li>
@@ -556,7 +559,7 @@ function App() {
                 <div className="contact-icon">💬</div>
                 <h3>Book Online</h3>
                 <p>24/7 AI Receptionist</p>
-                <button className="contact-book-btn" onClick={() => setIsOpen(true)}>
+                <button className="contact-book-btn" onClick={() => setIsChatOpen(true)}>
                   Chat with Us
                 </button>
               </div>
@@ -659,15 +662,15 @@ function App() {
       </footer>
 
       {/* Floating Chat Button */}
-      {!isOpen && (
-        <button className="floating-book-button" onClick={() => setIsOpen(true)}>
+      {!isChatOpen && (
+        <button className="floating-book-button" onClick={() => setIsChatOpen(true)}>
           <span className="book-icon">💬</span>
           <span className="book-text">Chat with Us</span>
         </button>
       )}
 
       {/* Chat Widget */}
-      <ChatWidget isOpen={isOpen} onClose={() => setIsOpen(false)} />
+      <ChatWidget isChatOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
 
       {/* Vercel Analytics */}
       <Analytics />

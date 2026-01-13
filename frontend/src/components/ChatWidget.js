@@ -37,7 +37,7 @@ function ChatWidget({ isOpen, onClose }) {
   const faqs = {
     pricing: "Our pricing varies based on the service and design complexity. For accurate pricing, please WhatsApp us with your preferred design and we'll provide a quote!",
     bridal: "Yes! We specialize in bridal nail art. Saloni personally handles bridal appointments with custom designs. Book in advance for your special day! 👰",
-    products: "We use only premium, internationally-certified products to ensure the health and beauty of your nails.",
+    products: "We use only premium quality products to ensure the health and beauty of your nails.",
     hygiene: "Hygiene is our top priority! All tools are properly sanitized and sterilized after each use.",
     walkIn: "Walk-ins are welcome! However, we recommend booking an appointment to ensure availability, especially for bridal services.",
     parking: "Yes, Garden City has ample parking space available for our customers.",
