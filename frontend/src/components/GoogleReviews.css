@@ -1,0 +1,28 @@
+/* Extras for the live Google reviews block (cards reuse App.css styles) */
+
+.live-reviews-badge {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  letter-spacing: 0.4px;
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.12);
+  border: 1px solid rgba(74, 222, 128, 0.35);
+}
+
+.review-card-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.review-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--primary-gold, #C9A961);
+}

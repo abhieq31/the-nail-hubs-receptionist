@@ -1,6 +1,8 @@
 import React, { useState, useCallback } from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import ChatWidget from './components/ChatWidget';
+import InstagramFeed from './components/InstagramFeed';
+import GoogleReviews from './components/GoogleReviews';
 import './App.css';
 
 // Constants
@@ -50,8 +52,8 @@ function App() {
             <li><a href="#about" onClick={() => scrollToSection('about')}>About</a></li>
             <li><a href="#contact" onClick={() => scrollToSection('contact')}>Contact</a></li>
             <li>
-              <button className="nav-book-btn" onClick={openWhatsAppBooking}>
-                📱 Book Now
+              <button className="nav-book-btn" onClick={() => { setIsChatOpen(true); setIsMobileMenuOpen(false); }}>
+                💅 Book Now
               </button>
             </li>
           </ul>
@@ -71,8 +73,11 @@ function App() {
             Ankleshwar's Premier Luxury Nail Salon
           </p>
           <div className="hero-buttons">
-            <button className="btn-primary" onClick={openWhatsAppBooking}>
-              📱 Book Appointment
+            <button className="btn-primary" onClick={() => setIsChatOpen(true)}>
+              💅 Book Instantly — 24/7
+            </button>
+            <button className="btn-secondary" onClick={openWhatsAppBooking}>
+              📱 Book on WhatsApp
             </button>
             <a
               href="https://www.whatsapp.com/channel/0029Vb6wVqy7T8bahzFZwV1d"
@@ -261,27 +266,8 @@ function App() {
                 </p>
               </div>
 
-              {/* Instagram Feed Widget */}
-              <div className="instagram-feed-wrapper">
-                <iframe
-                  src="https://www.instagram.com/thenailhubs/embed"
-                  className="instagram-feed-iframe"
-                  frameBorder="0"
-                  scrolling="no"
-                  allowTransparency="true"
-                  loading="lazy"
-                  title="Instagram Feed"
-                  style={{
-                    background: 'white',
-                    maxWidth: '100%',
-                    width: '100%',
-                    border: 'none',
-                    overflow: 'hidden',
-                    minHeight: '600px',
-                    borderRadius: '15px'
-                  }}
-                />
-              </div>
+              {/* Live Instagram posts & stories (falls back to embed) */}
+              <InstagramFeed />
 
               <div className="instagram-features">
                 <div className="feature-card">
@@ -318,13 +304,8 @@ function App() {
           <div className="reviews-content">
             {/* Google Reviews Embed */}
             <div className="google-reviews-container">
-              <div className="reviews-header">
-                <div className="reviews-rating">
-                  <span className="star-icon">⭐⭐⭐⭐⭐</span>
-                  <h3>5.0 Rating on Google</h3>
-                  <p>Join hundreds of satisfied customers!</p>
-                </div>
-              </div>
+              {/* Live Google rating & latest reviews (falls back to curated testimonials) */}
+              <GoogleReviews />
 
               {/* Google Maps Reviews Embed */}
               <div className="google-maps-embed">
@@ -338,95 +319,6 @@ function App() {
                   referrerPolicy="no-referrer-when-downgrade"
                   title="The Nail Hubs Google Reviews"
                 ></iframe>
-              </div>
-
-              {/* Customer Testimonials */}
-              <div className="testimonials-header">
-                <h3>Customer Testimonials</h3>
-                <p>Hear what our clients have to say about their experience</p>
-              </div>
-
-              <div className="review-cards">
-                <div className="review-card">
-                  <div className="review-stars">⭐⭐⭐⭐⭐</div>
-                  <p className="review-text">
-                    I went here for my wedding Nail art… & I noticed Cooperative nature of saloni, she explains well about shapes of nail extensions, gel polish, which colour would suit on my outfits... also her suggestions for designs and colours are up to mark… thank you for making my nails pretty 🤗♥️
-                  </p>
-                  <p className="review-author">- Vyoma Patel</p>
-                  <p className="review-meta">Local Guide · 2 years ago</p>
-                </div>
-
-                <div className="review-card">
-                  <div className="review-stars">⭐⭐⭐⭐⭐</div>
-                  <p className="review-text">
-                    I recently had the pleasure of getting my nails done at The Nails Hub, and I must say it was such a relaxing and enjoyable experience! I especially loved how creative and detailed the nail artist was—the design turned out even better than I imagined!
-                  </p>
-                  <p className="review-author">- Dhvani Shah</p>
-                  <p className="review-meta">7 months ago</p>
-                </div>
-
-                <div className="review-card">
-                  <div className="review-stars">⭐⭐⭐⭐⭐</div>
-                  <p className="review-text">
-                    Firstly I would like to say Thank you to saloni for being so polite and courteous, nail techs actually are very knowledgeable and have interest. I highly recommend this nail studio (THE NAIL HUBS).
-                  </p>
-                  <p className="review-author">- Gayatri Patel</p>
-                  <p className="review-meta">A year ago</p>
-                </div>
-
-                <div className="review-card">
-                  <div className="review-stars">⭐⭐⭐⭐⭐</div>
-                  <p className="review-text">
-                    It was amazing experience. I never got my nails done nd the owner was very sweet despite me fumbling. It was a really good experience overall.
-                  </p>
-                  <p className="review-author">- Helin Patel</p>
-                  <p className="review-meta">3 months ago</p>
-                </div>
-
-                <div className="review-card">
-                  <div className="review-stars">⭐⭐⭐⭐⭐</div>
-                  <p className="review-text">
-                    Got the beautiful nails.... So happy to choose her for permanent things.... Thank you so much the nail hubs (saloni) my first experience is good and worth visiting .. ♥️♥️♥️♥️😘
-                  </p>
-                  <p className="review-author">- Dolly Suthar</p>
-                  <p className="review-meta">A year ago</p>
-                </div>
-
-                <div className="review-card">
-                  <div className="review-stars">⭐⭐⭐⭐⭐</div>
-                  <p className="review-text">
-                    Must visit guys. It's a such a amazing experience ❤️❤️❤️ I am so happy with artist's work and it's is also reasonable range ❤️❤️❤️❤️
-                  </p>
-                  <p className="review-author">- Nidhi Patel</p>
-                  <p className="review-meta">2 years ago</p>
-                </div>
-
-                <div className="review-card">
-                  <div className="review-stars">⭐⭐⭐⭐⭐</div>
-                  <p className="review-text">
-                    Very happy with the service here! My sister got her nails done here for her birthday ceremony and she was too happy with that...... Thank you THE NAIL HUBS (saloni didi) 😍💐
-                  </p>
-                  <p className="review-author">- Meet Patel</p>
-                  <p className="review-meta">A year ago</p>
-                </div>
-
-                <div className="review-card">
-                  <div className="review-stars">⭐⭐⭐⭐⭐</div>
-                  <p className="review-text">
-                    She has magical hands... Got awesome nails.... Specially came from Bharuch....very happy.... ♥️♥️♥️
-                  </p>
-                  <p className="review-author">- Minaxi Patel</p>
-                  <p className="review-meta">A year ago</p>
-                </div>
-
-                <div className="review-card">
-                  <div className="review-stars">⭐⭐⭐⭐⭐</div>
-                  <p className="review-text">
-                    Art of nails is too much elegance and natural. Nature is too much soft and friendly.
-                  </p>
-                  <p className="review-author">- Misha Patel</p>
-                  <p className="review-meta">10 months ago</p>
-                </div>
               </div>
 
               {/* CTA to Leave Review */}
@@ -481,7 +373,7 @@ function App() {
                   <div className="highlight-label">Happy Clients</div>
                 </div>
                 <div className="highlight-item">
-                  <div className="highlight-number">6</div>
+                  <div className="highlight-number">7</div>
                   <div className="highlight-label">Premium Services</div>
                 </div>
               </div>
@@ -615,9 +507,9 @@ function App() {
               <div className="footer-column">
                 <h4>Services</h4>
                 <ul>
-                  <li>✨ Gel Nails</li>
-                  <li>💎 Acrylic Nails</li>
-                  <li>🌟 Nail Extensions</li>
+                  <li>💅 Acrylic Nails</li>
+                  <li>🎨 Nail Art & Designs</li>
+                  <li>💎 Nail Extensions</li>
                   <li>👰 Bridal Nail Art</li>
                 </ul>
               </div>

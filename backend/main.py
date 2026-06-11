@@ -17,7 +17,8 @@ from database import init_database, get_appointment_by_confirmation_id, cancel_a
 from availability_engine import get_available_slots, get_next_available_dates, validate_slot_available
 from agent import NailHubsAgent
 from ai_agent import AIReceptionistAgent
-from business_rules import SERVICES, BUSINESS_NAME
+from business_rules import SERVICES, SERVICE_DETAILS, BUSINESS_NAME
+from integrations import get_instagram_feed, get_instagram_stories, get_google_reviews, refresh_instagram_token
 
 app = FastAPI(title=f"{BUSINESS_NAME} Booking API")
 
@@ -26,10 +27,11 @@ app = FastAPI(title=f"{BUSINESS_NAME} Booking API")
 async def startup_event():
     init_database()
 
-# CORS middleware for frontend
+# CORS middleware for frontend (set ALLOWED_ORIGINS="https://yoursite.com,https://www.yoursite.com" in production)
+allowed_origins = [o.strip() for o in os.environ.get("ALLOWED_ORIGINS", "*").split(",")]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify your frontend domain
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -86,7 +88,13 @@ def get_services():
     """Get list of available services"""
     return {
         "services": [
-            {"name": name, "duration": duration}
+            {
+                "name": name,
+                "duration": duration,
+                "display_duration": SERVICE_DETAILS.get(name, {}).get("display_duration", f"{duration} min"),
+                "icon": SERVICE_DETAILS.get(name, {}).get("icon", "💅"),
+                "popular": SERVICE_DETAILS.get(name, {}).get("popular", False),
+            }
             for name, duration in SERVICES.items()
         ]
     }
@@ -286,6 +294,31 @@ def ai_chat(request: ChatRequest):
         "session_id": session_id,
         "response": response
     }
+
+
+# Live social integrations
+@app.get("/instagram/feed")
+def instagram_feed(limit: int = 12):
+    """Latest Instagram posts (cached). Returns configured: false if no token set."""
+    return get_instagram_feed(limit)
+
+
+@app.get("/instagram/stories")
+def instagram_stories():
+    """Active Instagram stories (cached). Returns configured: false if no token set."""
+    return get_instagram_stories()
+
+
+@app.get("/instagram/refresh-token")
+def instagram_refresh_token():
+    """Refresh the long-lived Instagram token. Run monthly and update INSTAGRAM_ACCESS_TOKEN."""
+    return refresh_instagram_token()
+
+
+@app.get("/google/reviews")
+def google_reviews():
+    """Live Google rating and latest reviews (cached). Returns configured: false if no key set."""
+    return get_google_reviews()
 
 
 if __name__ == "__main__":

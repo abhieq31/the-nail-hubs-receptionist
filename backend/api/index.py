@@ -1,28 +1,17 @@
 """
-Simple Vercel serverless handler for testing
+Vercel serverless entry point — exposes the full booking API from main.py
 """
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+import os
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from mangum import Mangum
 
-app = FastAPI()
+from main import app
+from database import init_database
 
-# CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Serverless invocations skip the uvicorn startup event, so init here
+init_database()
 
-@app.get("/")
-def read_root():
-    return {"message": "The Nail Hubs API is running!"}
-
-@app.get("/health")
-def health_check():
-    return {"status": "healthy"}
-
-# Vercel handler
 handler = Mangum(app)
