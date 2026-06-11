@@ -7,35 +7,35 @@ A production-ready 24×7 AI receptionist for The Nail Hubs luxury nail salon. Th
 **The Nail Hubs**
 - Location: B-292, Garden City, Ankleshwar – 393001, Gujarat, India
 - Phone: 07698 235501
-- Hours: Monday-Saturday, 11:00 AM - 6:00 PM
-- Closed: Sunday
+- Hours: Open all 7 days, 11:00 AM - 6:00 PM
 - Timezone: Asia/Kolkata
 
 ## Features
 
-### Current (MVP)
-- 24×7 conversational appointment booking
+### Current
+- 24×7 AI receptionist chat widget — books, reschedules, and cancels appointments live against the booking API
 - Deterministic availability engine (no double bookings)
-- Real-time slot validation
-- Confirmation ID generation
+- Real-time slot validation with 10-minute buffer between appointments
+- Confirmation ID generation, lookup, reschedule, and cancel by ID
 - Service-aware scheduling (different durations per service)
-- Business hours enforcement
-- 10-minute buffer between appointments
-- Website chat widget integration
-- Book, reschedule, and cancel appointments
+- **Live Instagram feed & stories** on the website (Instagram Graph API, cached, with automatic fallback to the profile embed)
+- **Live Google rating & latest reviews** (Google Places API, cached, with fallback to curated testimonials)
+- Optional GPT-powered natural-language receptionist (`/ai-chat`)
+- WhatsApp booking fallback whenever the API is unreachable
+- Fully responsive luxury design (desktop / tablet / mobile)
 - SQLite database storage
 
 ### Services Offered
-- Gel Nails (60 min)
-- Acrylic Nails (90 min)
-- Nail Extensions (90 min)
-- Bridal Nail Art (120 min)
-- Nail Refill (45 min)
-- Press-on Nails (30 min)
+- Acrylic Nails (100–120 min)
+- Nail Art (75–120 min)
+- Nail Extensions (90–110 min)
+- Nail Decals (25–35 min)
+- Nail Polish Changes (25–30 min)
+- Nail Painting & Designs (60–90 min)
+- Nail Repair (20–30 min)
 
 ### Planned Features
 - Instagram DM integration
-- WhatsApp booking
 - Google Calendar synchronization
 - Multi-staff scheduling
 - Admin dashboard
@@ -104,12 +104,36 @@ venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-5. Start the backend server:
+5. Configure environment (optional but recommended):
+```bash
+cp .env.example .env
+# then fill in the keys you have — every integration is optional
+```
+
+6. Start the backend server:
 ```bash
 python main.py
 ```
 
 The backend will run on `http://localhost:8000`
+
+### Live Integrations Setup
+
+All integrations degrade gracefully — without keys the site still works
+(Instagram falls back to the profile embed, reviews fall back to curated
+testimonials, the chat falls back to WhatsApp booking if the API is down).
+
+**Instagram feed & stories** (`INSTAGRAM_ACCESS_TOKEN`):
+1. Convert `@thenailhubs` to an Instagram **Professional** account (free, Settings → Account type)
+2. Create an app at [developers.facebook.com](https://developers.facebook.com) using the **"Instagram API with Instagram Login"** product
+3. Generate a long-lived access token for the salon account and set it as `INSTAGRAM_ACCESS_TOKEN`
+4. Tokens last 60 days — call `GET /instagram/refresh-token` monthly and save the returned token
+
+**Google rating & reviews** (`GOOGLE_PLACES_API_KEY`, `GOOGLE_PLACE_ID`):
+1. In [Google Cloud Console](https://console.cloud.google.com), create an API key and enable **Places API (New)** — the free tier easily covers a salon site since responses are cached for 6 hours
+2. Find the salon's Place ID with the [Place ID finder](https://developers.google.com/maps/documentation/places/web-service/place-id)
+
+**Frontend → backend URL**: copy `frontend/.env.example` to `frontend/.env` and set `REACT_APP_API_URL` to the deployed backend URL (or configure it in Vercel project settings).
 
 ### Frontend Setup
 
@@ -137,13 +161,19 @@ The frontend will open in your browser at `http://localhost:3000`
 
 ### Direct Endpoints
 - `GET /` - Health check
-- `GET /services` - List available services
+- `GET /services` - List available services (with durations & icons)
 - `GET /available-dates` - Get next available working days
 - `POST /availability` - Check available slots for a service/date
 - `POST /book` - Create a new appointment
 - `POST /reschedule` - Reschedule existing appointment
 - `POST /cancel` - Cancel appointment
 - `GET /appointment/{confirmation_id}` - Get appointment details
+
+### Live Social Endpoints
+- `GET /instagram/feed?limit=12` - Latest Instagram posts (cached 30 min)
+- `GET /instagram/stories` - Active Instagram stories (cached 10 min)
+- `GET /instagram/refresh-token` - Refresh the long-lived Instagram token
+- `GET /google/reviews` - Live Google rating & latest reviews (cached 6 h)
 
 ## Usage Examples
 
@@ -169,7 +199,7 @@ The agent will guide customers through:
 curl -X POST http://localhost:8000/availability \
   -H "Content-Type: application/json" \
   -d '{
-    "service": "Gel Nails",
+    "service": "Acrylic Nails",
     "date": "2026-01-15",
     "count": 4
   }'
@@ -180,7 +210,7 @@ curl -X POST http://localhost:8000/book \
   -d '{
     "customer_name": "Priya Shah",
     "customer_phone": "9876543210",
-    "service": "Gel Nails",
+    "service": "Acrylic Nails",
     "appointment_date": "2026-01-15",
     "appointment_time": "14:00:00"
   }'
@@ -210,7 +240,7 @@ curl -X POST http://localhost:8000/book \
 
 All business logic is centralized in `backend/business_rules.py`:
 
-- **Working Days**: Monday-Saturday (closed Sunday)
+- **Working Days**: Open all 7 days
 - **Hours**: 11:00 AM - 6:00 PM
 - **Buffer**: 10 minutes between appointments
 - **Advance Booking**: Up to 30 days ahead
@@ -334,7 +364,7 @@ pytest  # (add tests in tests/ folder)
 ```bash
 python -c "
 from availability_engine import get_available_slots
-slots = get_available_slots('Gel Nails', '2026-01-15')
+slots = get_available_slots('Acrylic Nails', '2026-01-15')
 print(slots)
 "
 ```

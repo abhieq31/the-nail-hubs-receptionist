@@ -21,14 +21,27 @@ OPENING_TIME = time(11, 0)  # 11:00 AM
 CLOSING_TIME = time(18, 0)  # 6:00 PM
 BUFFER_MINUTES = 10
 
-# Services (name -> duration in minutes)
+# Services (name -> booking duration in minutes, upper end of the real range
+# so the schedule never overruns)
 SERVICES = {
-    "Gel Nails": 45,
-    "Acrylic Nails": 45,
-    "Nail Extensions": 45,
-    "Bridal Nail Art": 45,
-    "Nail Refill": 45,
-    "Press-on Nails": 45,
+    "Acrylic Nails": 120,
+    "Nail Art": 90,
+    "Nail Extensions": 110,
+    "Nail Decals": 35,
+    "Nail Polish Changes": 30,
+    "Nail Painting & Designs": 90,
+    "Nail Repair": 30,
+}
+
+# Display metadata for the website / chat receptionist
+SERVICE_DETAILS = {
+    "Acrylic Nails": {"display_duration": "100–120 min", "icon": "💅", "popular": True},
+    "Nail Art": {"display_duration": "75–120 min", "icon": "🎨", "popular": False},
+    "Nail Extensions": {"display_duration": "90–110 min", "icon": "💎", "popular": False},
+    "Nail Decals": {"display_duration": "25–35 min", "icon": "✨", "popular": False},
+    "Nail Polish Changes": {"display_duration": "25–30 min", "icon": "💅", "popular": False},
+    "Nail Painting & Designs": {"display_duration": "60–90 min", "icon": "🖌️", "popular": False},
+    "Nail Repair": {"display_duration": "20–30 min", "icon": "🔧", "popular": False},
 }
 
 # Agent Conversation Settings

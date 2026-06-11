@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { api } from '../api';
 import './ChatWidget.css';
 
 function ChatWidget({ isOpen, onClose }) {
@@ -8,6 +9,9 @@ function ChatWidget({ isOpen, onClose }) {
   const [isTyping, setIsTyping] = useState(false);
   const [quickReplies, setQuickReplies] = useState([]);
   const messagesEndRef = useRef(null);
+  // Active booking / reschedule / manage flow (kept in a ref so async
+  // handlers and the input handler always see the latest step)
+  const flowRef = useRef(null);
 
   // Business Information
   const businessInfo = {
@@ -102,11 +106,12 @@ function ChatWidget({ isOpen, onClose }) {
   };
 
   const showWelcomeMessage = () => {
+    flowRef.current = null;
     const greeting = getTimeBasedGreeting();
     const welcomeText = `${greeting} ✨
 
 Welcome to **The Nail Hubs**!
-I'm your virtual nail assistant, here to help you discover our services and book your perfect appointment.
+I'm your 24/7 receptionist — I can book your appointment instantly right here, or help you reschedule and answer any questions.
 
 How can I assist you today?`;
 
@@ -117,7 +122,8 @@ How can I assist you today?`;
     }]);
 
     setOptions([
-      { label: '📅 Book Appointment', value: 'book', icon: '📅' },
+      { label: '📅 Book Appointment', value: 'book', icon: '📅', highlight: true },
+      { label: '🗂️ Manage My Booking', value: 'manage', icon: '🗂️' },
       { label: '💅 View Services', value: 'services', icon: '💅' },
       { label: '💰 Pricing Info', value: 'pricing', icon: '💰' },
       { label: '📍 Location & Hours', value: 'location', icon: '📍' },
@@ -146,9 +152,42 @@ How can I assist you today?`;
     setOptions([]);
     setQuickReplies([]);
 
+    // Live booking flow buttons (value encodes "prefix:data|label")
+    if (typeof value === 'string') {
+      if (value.startsWith('svc:')) {
+        chooseService(value.slice(4));
+        return;
+      }
+      if (value.startsWith('date:')) {
+        const [date, label] = value.slice(5).split('|');
+        chooseDate(date, label);
+        return;
+      }
+      if (value.startsWith('slot:')) {
+        const [time, label] = value.slice(5).split('|');
+        chooseSlot(time, label);
+        return;
+      }
+    }
+
     switch (value) {
       case 'book':
         handleBooking();
+        break;
+      case 'manage':
+        handleManage();
+        break;
+      case 'confirm_booking':
+        confirmBooking();
+        break;
+      case 'manage_cancel':
+        confirmCancel();
+        break;
+      case 'manage_cancel_yes':
+        doCancel();
+        break;
+      case 'manage_reschedule':
+        startReschedule();
         break;
       case 'services':
         handleServices();
@@ -238,27 +277,303 @@ How can I assist you today?`;
     { label: '🔙 Main Menu', value: 'main_menu' },
   ];
 
-  const handleBooking = () => {
-    const bookingText = `📅 **Book Your Appointment**
+  // ── Live booking flow (talks to the FastAPI backend) ──────────────
 
-Ready to pamper yourself? Here's how to book:
+  const apiUnavailable = (intro = "Hmm, I couldn't reach our booking system right now. 😔") => {
+    flowRef.current = null;
+    addBotMessage(`${intro}
 
-**WhatsApp Booking** (Recommended)
-Quick responses & easy scheduling!
-
-**Call Us**
-Speak directly with our team
-
-🕐 **Hours:** ${businessInfo.hours}
-👩‍🎨 **Artist:** Saloni (Owner)
-
-What's your preferred booking method?`;
-
-    addBotMessage(bookingText, [
+No worries — you can book instantly on WhatsApp and Saloni will confirm your slot personally! 💜`, [
       { label: '📱 Book on WhatsApp', value: 'book_whatsapp', highlight: true },
-      { label: '📞 Call Now', value: 'book_call' },
+      { label: '🔄 Try Again', value: 'book' },
+      { label: '📞 Call Us', value: 'book_call' },
       { label: '🔙 Main Menu', value: 'main_menu' },
     ]);
+  };
+
+  const handleBooking = async () => {
+    setIsTyping(true);
+    try {
+      const { services: liveServices } = await api.getServices();
+      flowRef.current = { type: 'book', step: 'service' };
+      addBotMessage(`📅 **Let's book your appointment!**
+
+I'll reserve your slot instantly — no waiting, confirmed on the spot. ✨
+
+Which service would you like?`, [
+        ...liveServices.map(s => ({
+          label: `${s.icon} ${s.name} · ${s.display_duration}`,
+          value: `svc:${s.name}`,
+          highlight: s.popular,
+        })),
+        { label: '📱 Prefer WhatsApp?', value: 'book_whatsapp' },
+        { label: '🔙 Main Menu', value: 'main_menu' },
+      ]);
+    } catch (e) {
+      apiUnavailable();
+    }
+  };
+
+  const chooseService = async (serviceName) => {
+    setIsTyping(true);
+    try {
+      const { dates } = await api.getAvailableDates(7);
+      flowRef.current = { ...(flowRef.current || { type: 'book' }), step: 'date', service: serviceName };
+      addBotMessage(`Great choice! ✨ **${serviceName}** it is.
+
+Which day works best for you?`, [
+        ...dates.map(d => ({ label: `📅 ${d.formatted}`, value: `date:${d.date}|${d.formatted}` })),
+        { label: '🔙 Main Menu', value: 'main_menu' },
+      ]);
+    } catch (e) {
+      apiUnavailable();
+    }
+  };
+
+  const chooseDate = async (date, dateLabel) => {
+    const flow = flowRef.current;
+    if (!flow || !flow.service) return showWelcomeMessage();
+    setIsTyping(true);
+    try {
+      const { slots } = await api.getAvailability(flow.service, date, 6);
+      if (!slots || slots.length === 0) {
+        addBotMessage(`Oh no, **${dateLabel}** is fully booked! 😅
+
+Saloni's artistry is in high demand. Shall we try another day?`, [
+          { label: '📅 Pick Another Day', value: `svc:${flow.service}`, highlight: true },
+          { label: '🔙 Main Menu', value: 'main_menu' },
+        ]);
+        return;
+      }
+      flowRef.current = { ...flow, step: 'time', date, dateLabel };
+      addBotMessage(`Perfect! Here are the open times for **${flow.service}** on **${dateLabel}**:`, [
+        ...slots.map(s => ({ label: `⏰ ${s.formatted_time}`, value: `slot:${s.time}|${s.formatted_time}` })),
+        { label: '🔙 Pick Another Day', value: `svc:${flow.service}` },
+        { label: '🔙 Main Menu', value: 'main_menu' },
+      ]);
+    } catch (e) {
+      apiUnavailable();
+    }
+  };
+
+  const chooseSlot = async (time, timeLabel) => {
+    const flow = flowRef.current;
+    if (!flow || !flow.date) return showWelcomeMessage();
+
+    if (flow.type === 'reschedule') {
+      setIsTyping(true);
+      try {
+        await api.reschedule(flow.confirmationId, flow.date, time);
+        flowRef.current = null;
+        addBotMessage(`✨ **All done!** Your appointment has been moved.
+
+📅 ${flow.dateLabel}
+⏰ ${timeLabel}
+🆔 ${flow.confirmationId}
+
+We'll see you then! 💅`, getBackToMenuOptions());
+      } catch (e) {
+        if (e.status === 409) {
+          addBotMessage(`Oops, that slot was just taken! 😱 Let me show you the latest availability.`, []);
+          setTimeout(() => chooseDate(flow.date, flow.dateLabel), 1200);
+        } else if (e.status === 404) {
+          flowRef.current = null;
+          addBotMessage(`I couldn't find that booking anymore. Please check your confirmation ID.`, getBackToMenuOptions());
+        } else {
+          apiUnavailable();
+        }
+      }
+      return;
+    }
+
+    flowRef.current = { ...flow, step: 'name', time, timeLabel };
+    addBotMessage(`Lovely! **${timeLabel}** on **${flow.dateLabel}** it is. 💖
+
+May I have your name, please? (Just type it below)`);
+  };
+
+  const handleNameInput = (text) => {
+    const name = text.trim().replace(/\s+/g, ' ');
+    if (name.length < 2 || name.length > 50) {
+      addBotMessage('Could you please share your full name? (2–50 characters)');
+      return;
+    }
+    const pretty = name.replace(/\b\w/g, c => c.toUpperCase());
+    flowRef.current = { ...flowRef.current, step: 'phone', name: pretty };
+    addBotMessage(`Thank you, ${pretty}! 😊
+
+And your 10-digit phone number? (We'll use it to confirm your appointment)`);
+  };
+
+  const handlePhoneInput = (text) => {
+    const phone = text.replace(/\D/g, '').replace(/^91(?=\d{10}$)/, '');
+    if (phone.length !== 10) {
+      addBotMessage('That doesn\'t look like a valid number — please enter your **10-digit** phone number. 📞');
+      return;
+    }
+    const flow = flowRef.current;
+    flowRef.current = { ...flow, step: 'confirm', phone };
+    addBotMessage(`Almost there! Please confirm your booking:
+
+💅 **Service:** ${flow.service}
+📅 **Date:** ${flow.dateLabel}
+⏰ **Time:** ${flow.timeLabel}
+👤 **Name:** ${flow.name}
+📞 **Phone:** ${phone}
+
+Shall I confirm it?`, [
+      { label: '✅ Confirm Booking', value: 'confirm_booking', highlight: true },
+      { label: '✏️ Start Over', value: 'book' },
+      { label: '🔙 Main Menu', value: 'main_menu' },
+    ]);
+  };
+
+  const confirmBooking = async () => {
+    const flow = flowRef.current;
+    if (!flow || !flow.phone) return showWelcomeMessage();
+    setIsTyping(true);
+    try {
+      const { appointment } = await api.book({
+        customer_name: flow.name,
+        customer_phone: flow.phone,
+        service: flow.service,
+        appointment_date: flow.date,
+        appointment_time: flow.time,
+      });
+      flowRef.current = null;
+      addBotMessage(`🎉 **You're booked, ${flow.name}!**
+
+💅 ${flow.service}
+📅 ${flow.dateLabel}
+⏰ ${flow.timeLabel}
+
+🆔 **Confirmation ID:** ${appointment.confirmation_id}
+
+Please save this ID — you can use it right here anytime to reschedule or cancel. We can't wait to pamper you! 💜`, [
+        { label: '🗂️ Manage This Booking', value: 'manage' },
+        { label: '📸 See Our Work', value: 'open_instagram' },
+        { label: '🔙 Main Menu', value: 'main_menu' },
+      ]);
+    } catch (e) {
+      if (e.status === 409) {
+        addBotMessage(`Oh no, that slot was booked by someone else just now! 😱 Let me show you the latest times.`, []);
+        setTimeout(() => chooseDate(flow.date, flow.dateLabel), 1200);
+      } else {
+        apiUnavailable('Something went wrong while confirming your booking. 😔');
+      }
+    }
+  };
+
+  // ── Manage booking (lookup / reschedule / cancel) ──────────────────
+
+  const handleManage = () => {
+    flowRef.current = { type: 'manage', step: 'manage_id' };
+    addBotMessage(`🗂️ **Manage Your Booking**
+
+Please type your confirmation ID (it looks like **NH1A2B3C** and was given when you booked).`, [
+      { label: '🔙 Main Menu', value: 'main_menu' },
+    ]);
+  };
+
+  const handleManageId = async (text) => {
+    const match = text.toUpperCase().match(/NH[A-F0-9]{6}/);
+    if (!match) {
+      addBotMessage(`Hmm, that doesn't look like a confirmation ID. It should look like **NH1A2B3C**. Please try again, or contact us if you've lost it.`, [
+        { label: '💬 WhatsApp Us', value: 'whatsapp_chat' },
+        { label: '🔙 Main Menu', value: 'main_menu' },
+      ]);
+      return;
+    }
+    const confirmationId = match[0];
+    setIsTyping(true);
+    try {
+      const appointment = await api.getAppointment(confirmationId);
+      if (appointment.status !== 'confirmed') {
+        flowRef.current = null;
+        addBotMessage(`That appointment has already been **${appointment.status}**.
+
+Would you like to book a new one?`, [
+          { label: '📅 Book New Appointment', value: 'book', highlight: true },
+          { label: '🔙 Main Menu', value: 'main_menu' },
+        ]);
+        return;
+      }
+      flowRef.current = { type: 'manage', step: 'manage_action', confirmationId, appointment };
+      const dateObj = new Date(`${appointment.appointment_date}T${appointment.appointment_time}`);
+      const formattedDate = dateObj.toLocaleDateString('en-IN', { weekday: 'long', month: 'long', day: 'numeric' });
+      const formattedTime = dateObj.toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true });
+      addBotMessage(`Found it! Here's your appointment: ✨
+
+💅 **${appointment.service}**
+📅 ${formattedDate}
+⏰ ${formattedTime}
+👤 ${appointment.customer_name}
+
+What would you like to do?`, [
+        { label: '🔁 Reschedule', value: 'manage_reschedule', highlight: true },
+        { label: '❌ Cancel Appointment', value: 'manage_cancel' },
+        { label: '🔙 Main Menu', value: 'main_menu' },
+      ]);
+    } catch (e) {
+      if (e.status === 404) {
+        addBotMessage(`I couldn't find a booking with ID **${confirmationId}**. Please double-check it, or reach out to us directly.`, [
+          { label: '💬 WhatsApp Us', value: 'whatsapp_chat' },
+          { label: '🔙 Main Menu', value: 'main_menu' },
+        ]);
+      } else {
+        apiUnavailable("I couldn't reach our booking system right now. 😔");
+      }
+    }
+  };
+
+  const startReschedule = async () => {
+    const flow = flowRef.current;
+    if (!flow || !flow.appointment) return showWelcomeMessage();
+    setIsTyping(true);
+    try {
+      const { dates } = await api.getAvailableDates(7);
+      flowRef.current = {
+        type: 'reschedule',
+        step: 'date',
+        service: flow.appointment.service,
+        confirmationId: flow.confirmationId,
+      };
+      addBotMessage(`🔁 Let's find a new time for your **${flow.appointment.service}**.
+
+Which day works best?`, [
+        ...dates.map(d => ({ label: `📅 ${d.formatted}`, value: `date:${d.date}|${d.formatted}` })),
+        { label: '🔙 Main Menu', value: 'main_menu' },
+      ]);
+    } catch (e) {
+      apiUnavailable();
+    }
+  };
+
+  const confirmCancel = () => {
+    const flow = flowRef.current;
+    if (!flow || !flow.confirmationId) return showWelcomeMessage();
+    addBotMessage(`Are you sure you want to cancel your **${flow.appointment.service}** appointment? 🥺`, [
+      { label: '✅ Yes, Cancel It', value: 'manage_cancel_yes' },
+      { label: '💜 No, Keep It', value: 'main_menu', highlight: true },
+    ]);
+  };
+
+  const doCancel = async () => {
+    const flow = flowRef.current;
+    if (!flow || !flow.confirmationId) return showWelcomeMessage();
+    setIsTyping(true);
+    try {
+      await api.cancel(flow.confirmationId);
+      flowRef.current = null;
+      addBotMessage(`Your appointment has been cancelled. We hope to see you again soon! 💕
+
+Whenever you're ready to treat yourself, I'm here 24/7. ✨`, [
+        { label: '📅 Book New Appointment', value: 'book', highlight: true },
+        { label: '🔙 Main Menu', value: 'main_menu' },
+      ]);
+    } catch (e) {
+      apiUnavailable("I couldn't cancel it right now. 😔");
+    }
   };
 
   const handleServices = () => {
@@ -510,7 +825,13 @@ Leave your own review after your visit!`;
     const lowerText = text.toLowerCase();
 
     // Keywords matching - ordered by specificity
-    if (lowerText.includes('book') || lowerText.includes('appointment') || lowerText.includes('schedule') || lowerText.includes('reserve')) {
+    if (/nh[a-f0-9]{6}/i.test(text) || lowerText.includes('cancel') || lowerText.includes('reschedul') || lowerText.includes('confirmation id') || lowerText.includes('my booking')) {
+      if (/nh[a-f0-9]{6}/i.test(text)) {
+        handleManageId(text);
+      } else {
+        handleManage();
+      }
+    } else if (lowerText.includes('book') || lowerText.includes('appointment') || lowerText.includes('schedule') || lowerText.includes('reserve')) {
       handleBooking();
     } else if (lowerText.includes('tip') || lowerText.includes('care') || lowerText.includes('maintain') || lowerText.includes('healthy nail')) {
       handleNailCareTips();
@@ -593,7 +914,17 @@ Leave your own review after your visit!`;
     setOptions([]);
     setQuickReplies([]);
 
-    handleNaturalLanguage(userInput);
+    // If a booking flow is waiting for typed input, route there first
+    const step = flowRef.current?.step;
+    if (step === 'name') {
+      handleNameInput(userInput);
+    } else if (step === 'phone') {
+      handlePhoneInput(userInput);
+    } else if (step === 'manage_id') {
+      handleManageId(userInput);
+    } else {
+      handleNaturalLanguage(userInput);
+    }
   };
 
   if (!isOpen) return null;

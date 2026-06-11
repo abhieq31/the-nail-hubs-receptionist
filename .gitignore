@@ -19,3 +19,6 @@ build/
 
 # Logs
 *.log
+
+# Keep env templates
+!.env.example
