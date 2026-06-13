@@ -2,10 +2,12 @@ import { Playfair_Display, Poppins } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/react';
 import ChatProvider from '@/components/ChatProvider';
 import ScrollReveal from '@/components/ScrollReveal';
+import QuoteSplash from '@/components/QuoteSplash';
 import '@/styles/globals.css';
 import '@/styles/chat.css';
 import '@/styles/feeds.css';
 import '@/styles/tryon.css';
+import '@/styles/experience.css';
 
 // Luxury typography, self-hosted by next/font (zero external requests)
 const heading = Playfair_Display({
@@ -62,6 +64,7 @@ export default function RootLayout({ children }) {
         <link rel="preconnect" href="https://storage.googleapis.com" />
       </head>
       <body>
+        <QuoteSplash />
         <ScrollReveal />
         <div className="App">
           <ChatProvider>{children}</ChatProvider>

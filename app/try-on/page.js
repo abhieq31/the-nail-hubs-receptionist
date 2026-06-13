@@ -1,6 +1,7 @@
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import TryOnStudio from '@/components/TryOnStudio';
+import InstaStrip from '@/components/InstaStrip';
 
 export const metadata = {
   title: 'AI Nail Try-On Studio | The Nail Hubs',
@@ -28,6 +29,10 @@ export default function TryOnPage() {
             <TryOnStudio />
           </div>
         </section>
+        <InstaStrip
+          title="Need inspiration?"
+          subtitle="Looks we've actually done — recreate any of them in the studio above"
+        />
       </main>
       <Footer />
     </>

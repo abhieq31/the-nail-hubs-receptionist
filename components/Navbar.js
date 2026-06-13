@@ -6,7 +6,7 @@ import { useChat } from './ChatProvider';
 
 function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { openChat } = useChat();
+  const { openBooking } = useChat();
   const closeMenu = () => setIsMobileMenuOpen(false);
 
   return (
@@ -34,7 +34,7 @@ function Navbar() {
           <li><a href="/#about" onClick={closeMenu}>About</a></li>
           <li><a href="/#contact" onClick={closeMenu}>Contact</a></li>
           <li>
-            <button className="nav-book-btn" onClick={() => { openChat(); closeMenu(); }}>
+            <button className="nav-book-btn" onClick={() => { openBooking(); closeMenu(); }}>
               💅 Book Now
             </button>
           </li>

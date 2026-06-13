@@ -9,7 +9,7 @@ import LiveAvailability from './LiveAvailability';
 const WHATSAPP_BOOKING_URL = `https://wa.me/${BUSINESS.phoneIntl}?text=Hello%2C%20I%20would%20like%20to%20book.%0A%0AName%3A%0ADate%3A%0ATime%3A%0AService%3A`;
 
 function Hero() {
-  const { openChat } = useChat();
+  const { openBooking } = useChat();
 
   return (
     <section id="home" className="hero">
@@ -25,8 +25,8 @@ function Hero() {
         </p>
         <LiveAvailability />
         <div className="hero-buttons">
-          <button className="btn-primary" onClick={openChat}>
-            💅 Book Instantly — 24/7
+          <button className="btn-primary" onClick={() => openBooking()}>
+            💅 Book in 30 Seconds — 24/7
           </button>
           <Link href="/try-on" className="btn-whatsapp">
             ✨ Try Nails On — AI Studio
