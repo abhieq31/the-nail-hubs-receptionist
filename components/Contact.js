@@ -5,7 +5,7 @@ import { BUSINESS } from '@/lib/businessRules';
 import { useChat } from './ChatProvider';
 
 function Contact() {
-  const { openChat } = useChat();
+  const { openChat, openBooking } = useChat();
 
   return (
     <section id="contact" className="contact-section">
@@ -45,8 +45,11 @@ function Contact() {
             <div className="contact-card">
               <div className="contact-icon">💬</div>
               <h3>Book Online</h3>
-              <p>24/7 AI Receptionist</p>
-              <button className="contact-book-btn" onClick={openChat}>
+              <p>Live slots, 24/7 — done in 30 seconds</p>
+              <button className="contact-book-btn" onClick={() => openBooking()}>
+                Book Now
+              </button>
+              <button className="contact-book-btn" onClick={openChat} style={{ marginTop: 8 }}>
                 Chat with Us
               </button>
             </div>

@@ -1,6 +1,7 @@
 import { BUSINESS, HOURS, SERVICES } from '@/lib/businessRules';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
+import InstaStrip from '@/components/InstaStrip';
 import TryOnTeaser from '@/components/TryOnTeaser';
 import Services from '@/components/Services';
 import Gallery from '@/components/Gallery';
@@ -57,6 +58,10 @@ export default function HomePage() {
       <Navbar />
       <main>
         <Hero />
+        <InstaStrip
+          title="Fresh from our Instagram"
+          subtitle="Real nails, real clients — straight from @thenailhubs"
+        />
         <TryOnTeaser />
         <Services />
         <Gallery />

@@ -56,6 +56,69 @@ export const FINISHES = [
   { id: 'french', label: 'French' },
 ];
 
+// MediaPipe (and some browsers) reject with strings, ErrorEvents or plain
+// objects instead of Error instances — never trust `e.message` to exist.
+function errorText(e) {
+  if (!e) return '';
+  if (typeof e === 'string') return e;
+  if (e.message) return e.message;
+  if (e.error?.message) return e.error.message;
+  try {
+    const s = String(e);
+    return s === '[object Object]' ? '' : s;
+  } catch {
+    return '';
+  }
+}
+
+// Decode an image file into a downscaled canvas. Works everywhere —
+// createImageBitmap(file, { resizeWidth }) throws on Safari/older browsers.
+async function decodeImageFile(file, maxSide = 1280) {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise((resolve, reject) => {
+      const el = new Image();
+      el.onload = () => resolve(el);
+      el.onerror = () =>
+        reject(new Error('that file could not be read as an image — a JPG or PNG works best'));
+      el.src = url;
+    });
+    const w = img.naturalWidth || img.width;
+    const h = img.naturalHeight || img.height;
+    if (!w || !h) throw new Error('that image looks empty — please try another photo');
+    const scale = Math.min(1, maxSide / Math.max(w, h));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(w * scale));
+    canvas.height = Math.max(1, Math.round(h * scale));
+    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+    return canvas;
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+function cameraErrorMessage(e) {
+  switch (e?.name) {
+    case 'NotAllowedError':
+    case 'PermissionDeniedError':
+      return 'Camera permission was denied. Allow camera access in your browser settings, or upload a photo of your hand below! 📷';
+    case 'NotFoundError':
+    case 'DevicesNotFoundError':
+      return "No camera was found on this device — upload a photo of your hand instead! 🖼️";
+    case 'NotReadableError':
+    case 'TrackStartError':
+      return 'Your camera seems to be in use by another app. Close it and try again, or upload a photo instead.';
+    case 'SecurityError':
+      return 'The camera only works on a secure (https) connection. You can still upload a photo below!';
+    default: {
+      const detail = errorText(e);
+      return detail
+        ? `Could not start the camera (${detail}). Try uploading a photo instead!`
+        : 'Could not start the camera. Try uploading a photo of your hand instead!';
+    }
+  }
+}
+
 function hexToRgb(hex) {
   const n = parseInt(hex.slice(1), 16);
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
@@ -252,14 +315,35 @@ function TryOnStudio() {
   const getLandmarker = useCallback(async (runningMode) => {
     if (!landmarkerRef.current) {
       setStatus('Loading the AI model (~6 MB, one time)…');
-      const { FilesetResolver, HandLandmarker } = await import('@mediapipe/tasks-vision');
-      const vision = await FilesetResolver.forVisionTasks(WASM_CDN);
-      landmarkerRef.current = await HandLandmarker.createFromOptions(vision, {
-        baseOptions: { modelAssetPath: HAND_MODEL, delegate: 'GPU' },
-        numHands: 2,
-        runningMode,
-      });
-      runningModeRef.current = runningMode;
+      let vision;
+      try {
+        const { FilesetResolver, HandLandmarker } = await import('@mediapipe/tasks-vision');
+        vision = await FilesetResolver.forVisionTasks(WASM_CDN);
+
+        // GPU first; many phones/webviews can't create a WebGL context for
+        // the GPU delegate, so silently fall back to CPU instead of dying.
+        try {
+          landmarkerRef.current = await HandLandmarker.createFromOptions(vision, {
+            baseOptions: { modelAssetPath: HAND_MODEL, delegate: 'GPU' },
+            numHands: 2,
+            runningMode,
+          });
+        } catch {
+          landmarkerRef.current = await HandLandmarker.createFromOptions(vision, {
+            baseOptions: { modelAssetPath: HAND_MODEL, delegate: 'CPU' },
+            numHands: 2,
+            runningMode,
+          });
+        }
+        runningModeRef.current = runningMode;
+      } catch (e) {
+        // leave the ref empty so the next tap retries from scratch
+        landmarkerRef.current = null;
+        const detail = errorText(e);
+        throw new Error(
+          `the AI model couldn't load${detail ? ` — ${detail}` : ''}. Please check your internet connection and try again`
+        );
+      }
     } else if (runningModeRef.current !== runningMode) {
       await landmarkerRef.current.setOptions({ runningMode });
       runningModeRef.current = runningMode;
@@ -270,16 +354,40 @@ function TryOnStudio() {
   // ── Live camera mode ──────────────────────────────────────────────
   const startCamera = useCallback(async (facing = 'user') => {
     setError('');
+
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setError(
+        window.isSecureContext === false
+          ? 'The camera only works on a secure (https) connection. You can still upload a photo below!'
+          : "This browser doesn't support camera access — upload a photo of your hand instead! 🖼️"
+      );
+      return;
+    }
+
     setMode('camera');
     try {
       const landmarker = await getLandmarker('VIDEO');
 
       setStatus('Starting camera…');
       stopCamera();
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: facing, width: { ideal: 1280 }, height: { ideal: 720 } },
-        audio: false,
-      });
+      let stream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: facing, width: { ideal: 1280 }, height: { ideal: 720 } },
+          audio: false,
+        });
+      } catch (constraintError) {
+        // Some devices reject the ideal resolution / facing mode —
+        // permission errors won't recover, but anything else might with
+        // the simplest possible constraints.
+        if (
+          constraintError?.name === 'NotAllowedError' ||
+          constraintError?.name === 'PermissionDeniedError'
+        ) {
+          throw constraintError;
+        }
+        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      }
       streamRef.current = stream;
       mirroredRef.current = facing === 'user';
 
@@ -304,7 +412,11 @@ function TryOnStudio() {
 
         if (video.currentTime !== lastVideoTime) {
           lastVideoTime = video.currentTime;
-          lastResult = landmarker.detectForVideo(video, performance.now());
+          try {
+            lastResult = landmarker.detectForVideo(video, performance.now());
+          } catch {
+            /* skip a bad frame rather than killing the whole loop */
+          }
         }
 
         const ctx = canvas.getContext('2d');
@@ -326,11 +438,7 @@ function TryOnStudio() {
       stopCamera();
       setMode('idle');
       setStatus('');
-      setError(
-        e.name === 'NotAllowedError'
-          ? 'Camera permission was denied. You can still upload a photo of your hand below! 📷'
-          : `Could not start the camera (${e.message}). Try uploading a photo instead!`
-      );
+      setError(cameraErrorMessage(e));
     }
   }, [getLandmarker, stopCamera]);
 
@@ -358,16 +466,9 @@ function TryOnStudio() {
       const landmarker = await getLandmarker('IMAGE');
       setStatus('Finding your hand…');
 
-      let bitmap = await createImageBitmap(file);
-      // keep things fast on big phone photos
-      const maxSide = 1280;
-      if (Math.max(bitmap.width, bitmap.height) > maxSide) {
-        const scale = maxSide / Math.max(bitmap.width, bitmap.height);
-        bitmap = await createImageBitmap(file, {
-          resizeWidth: Math.round(bitmap.width * scale),
-          resizeHeight: Math.round(bitmap.height * scale),
-        });
-      }
+      // decoded + downscaled on a plain canvas: works on every browser,
+      // unlike createImageBitmap with resize options
+      const bitmap = await decodeImageFile(file, 1280);
 
       const result = landmarker.detect(bitmap);
       const hands = result?.landmarks || [];
@@ -381,7 +482,12 @@ function TryOnStudio() {
     } catch (e) {
       setMode('idle');
       setStatus('');
-      setError(`Could not process that photo (${e.message}).`);
+      const detail = errorText(e);
+      setError(
+        detail
+          ? `Could not process that photo — ${detail}.`
+          : 'Could not process that photo. Please try another one (a clear JPG or PNG works best).'
+      );
     } finally {
       event.target.value = '';
     }

@@ -1,5 +1,8 @@
+'use client';
+
 import React from 'react';
 import { SERVICES } from '@/lib/businessRules';
+import { useChat } from './ChatProvider';
 
 const SERVICE_COPY = {
   'Acrylic Nails': {
@@ -33,6 +36,8 @@ const SERVICE_COPY = {
 };
 
 function Services() {
+  const { openBooking } = useChat();
+
   return (
     <section id="services" className="services-section">
       <div className="container">
@@ -54,6 +59,9 @@ function Services() {
               <ul className="service-features">
                 {(SERVICE_COPY[name]?.features || []).map((f) => <li key={f}>{f}</li>)}
               </ul>
+              <button className="service-book-btn" onClick={() => openBooking(name)}>
+                Book {svc.icon} →
+              </button>
             </div>
           ))}
         </div>

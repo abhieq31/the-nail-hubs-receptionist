@@ -9,7 +9,7 @@ import { useChat } from './ChatProvider';
 // Honest, real-time urgency: open/closed right now (salon time) and the
 // next genuinely free slot today, straight from the availability engine.
 function LiveAvailability() {
-  const { openChat } = useChat();
+  const { openBooking } = useChat();
   const [info, setInfo] = useState(null);
 
   useEffect(() => {
@@ -51,7 +51,7 @@ function LiveAvailability() {
   }
 
   return (
-    <button className="live-availability" onClick={openChat} aria-label="Book an appointment">
+    <button className="live-availability" onClick={() => openBooking()} aria-label="Book an appointment">
       <span className={`live-dot ${info.isOpen ? 'open' : 'closed'}`} />
       <span className="live-status-text">{statusText}</span>
       {slotText && (

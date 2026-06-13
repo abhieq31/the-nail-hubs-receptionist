@@ -7,7 +7,7 @@ import { useChat } from './ChatProvider';
 // Mobile-only sticky action bar: most visitors arrive from Instagram on a
 // phone — booking should never be more than one thumb-tap away.
 function StickyBookBar() {
-  const { isChatOpen, openChat } = useChat();
+  const { isChatOpen, isBookingOpen, openBooking } = useChat();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -17,12 +17,12 @@ function StickyBookBar() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  if (!visible || isChatOpen) return null;
+  if (!visible || isChatOpen || isBookingOpen) return null;
 
   return (
     <div className="sticky-book-bar">
-      <button className="sticky-book-btn primary" onClick={openChat}>
-        💬 Book Instantly
+      <button className="sticky-book-btn primary" onClick={() => openBooking()}>
+        💅 Book Now
       </button>
       <a
         className="sticky-book-btn whatsapp"
