@@ -60,8 +60,6 @@ export default function RootLayout({ children }) {
       <head>
         <link rel="preconnect" href="https://www.instagram.com" />
         <link rel="preconnect" href="https://www.google.com" />
-        <link rel="preconnect" href="https://cdn.jsdelivr.net" />
-        <link rel="preconnect" href="https://storage.googleapis.com" />
       </head>
       <body>
         <QuoteSplash />

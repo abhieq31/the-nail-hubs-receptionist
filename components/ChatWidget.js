@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { api } from '@/lib/clientApi';
+import { nowInSalonTime } from '@/lib/time';
 
 function ChatWidget({ isOpen, onClose }) {
   const [messages, setMessages] = useState([]);
@@ -66,6 +67,19 @@ function ChatWidget({ isOpen, onClose }) {
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // Bot copy uses **bold** markdown, but messages can also contain raw text
+  // a visitor typed — escape HTML first so a pasted "<img onerror=...>" can
+  // never execute, then apply the bold transform on the escaped string.
+  const renderMessageHtml = (text) => {
+    const escaped = text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+    return escaped.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
   };
 
   useEffect(() => {
@@ -139,8 +153,10 @@ How can I assist you today?`;
     setQuickReplies(['Book appointment', 'View services', 'Nail care tips']);
   };
 
+  // Salon time (IST), not the visitor's local clock — a "Good Morning" should
+  // mean morning in Ankleshwar even for a visitor browsing from another timezone.
   const getTimeBasedGreeting = () => {
-    const hour = new Date().getHours();
+    const hour = Math.floor(nowInSalonTime().minutes / 60);
     if (hour < 12) return 'Good Morning';
     if (hour < 17) return 'Good Afternoon';
     return 'Good Evening';
@@ -1026,9 +1042,7 @@ Leave your own review after your visit!`;
             )}
             <div className="message-bubble">
               <p style={{ whiteSpace: 'pre-line' }}
-                 dangerouslySetInnerHTML={{
-                   __html: msg.text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                 }}
+                 dangerouslySetInnerHTML={{ __html: renderMessageHtml(msg.text) }}
               />
               <span className="timestamp">
                 {msg.timestamp.toLocaleTimeString([], {

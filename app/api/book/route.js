@@ -6,10 +6,18 @@ import {
   generateConfirmationId,
 } from '@/lib/availability';
 import { getSupabase, NOT_CONFIGURED } from '@/lib/supabase';
+import { isRateLimited } from '@/lib/rateLimit';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request) {
+  if (isRateLimited(request, { scope: 'book', limit: 5, windowMs: 10 * 60 * 1000 })) {
+    return NextResponse.json(
+      { detail: 'Too many booking attempts — please wait a few minutes and try again, or book on WhatsApp.' },
+      { status: 429 }
+    );
+  }
+
   const body = await request.json();
   const { customer_name, customer_phone, service, appointment_date, appointment_time } = body;
 

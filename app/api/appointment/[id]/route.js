@@ -1,9 +1,14 @@
 import { NextResponse } from 'next/server';
 import { getSupabase, NOT_CONFIGURED } from '@/lib/supabase';
+import { isRateLimited } from '@/lib/rateLimit';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request, { params }) {
+  if (isRateLimited(request, { scope: 'appointment_lookup', limit: 20, windowMs: 10 * 60 * 1000 })) {
+    return NextResponse.json({ detail: 'Too many attempts — please wait a few minutes and try again.' }, { status: 429 });
+  }
+
   const { id } = await params;
   const confirmationId = (id || '').toUpperCase();
 

@@ -2,8 +2,9 @@ import { ImageResponse } from 'next/og';
 
 // The share card people see when the site is sent on WhatsApp / Instagram —
 // the salon's #1 channels. Generated on the fly, no design tools needed.
+// No dynamic params here, so this prerenders to a static file at build time
+// (the edge runtime would force it to regenerate on every request instead).
 
-export const runtime = 'edge';
 export const alt = 'The Nail Hubs — Ankleshwar’s Premier Luxury Nail Salon';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
