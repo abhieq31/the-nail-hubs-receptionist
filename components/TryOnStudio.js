@@ -9,9 +9,13 @@ import { BUSINESS } from '@/lib/businessRules';
 // real fingertips in real time. Zero servers, zero cost, total privacy:
 // no frame ever leaves the visitor's device.
 
-const WASM_CDN = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/wasm';
-const HAND_MODEL =
-  'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/latest/hand_landmarker.task';
+// Served from our own origin (Vercel's edge CDN) so the studio never depends
+// on third-party CDNs (jsdelivr / googleapis) that are slow or blocked on some
+// mobile networks — the #1 cause of "the AI model couldn't load". The wasm
+// runtime is vendored from node_modules into public/mediapipe/wasm at this
+// version; the model is the pinned float16/1 hand_landmarker.task.
+const WASM_CDN = '/mediapipe/wasm';
+const HAND_MODEL = '/mediapipe/hand_landmarker.task';
 
 // [tip, joint-below] landmark indices for thumb → pinky
 const FINGERTIPS = [
@@ -56,16 +60,23 @@ export const FINISHES = [
   { id: 'french', label: 'French' },
 ];
 
-// MediaPipe (and some browsers) reject with strings, ErrorEvents or plain
-// objects instead of Error instances — never trust `e.message` to exist.
+// MediaPipe (and some browsers) reject with strings, Events, ErrorEvents or
+// plain objects instead of Error instances — never trust `e.message` to exist,
+// and never let an opaque value like "[object Event]" leak into a message.
 function errorText(e) {
   if (!e) return '';
   if (typeof e === 'string') return e;
-  if (e.message) return e.message;
+  if (typeof e.message === 'string' && e.message) return e.message;
   if (e.error?.message) return e.error.message;
+  // Failed resource loads (wasm/model) reject with a DOM Event whose target is
+  // the element/request that failed — surface something readable, not [object Event].
+  if (typeof Event !== 'undefined' && e instanceof Event) {
+    const src = e.target?.src || e.target?.currentSrc || e.target?.responseURL;
+    return src ? `a required file failed to load (${src})` : 'a required file failed to load';
+  }
   try {
     const s = String(e);
-    return s === '[object Object]' ? '' : s;
+    return /^\[object .*\]$/.test(s) ? '' : s;
   } catch {
     return '';
   }

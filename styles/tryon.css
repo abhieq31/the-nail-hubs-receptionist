@@ -339,9 +339,35 @@
     padding: 18px;
   }
 
+  /* Bigger, finger-friendly tap targets on touch — most visitors are on phones */
+  .tryon-swatches {
+    gap: 12px;
+  }
+
   .tryon-swatch {
-    width: 33px;
-    height: 33px;
+    width: 44px;
+    height: 44px;
+  }
+
+  .tryon-chip,
+  .tryon-action {
+    padding: 12px 18px;
+    font-size: 1rem;
+  }
+
+  /* Stack the start buttons so each is a full-width thumb target */
+  .tryon-start-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .tryon-start-buttons .btn-primary,
+  .tryon-start-buttons .btn-secondary {
+    width: 100%;
+  }
+
+  .tryon-placeholder {
+    padding: 40px 20px;
   }
 
   .tryon-actions {
