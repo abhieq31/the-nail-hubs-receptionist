@@ -602,13 +602,13 @@ function TryOnStudio() {
           </div>
         )}
 
-        {status && <div className="tryon-status">{status}</div>}
+        {status && <div className="tryon-status" role="status" aria-live="polite">{status}</div>}
         {mode === 'camera' && !status && !handVisible && (
-          <div className="tryon-status">Show your hand to the camera ✋</div>
+          <div className="tryon-status" role="status" aria-live="polite">Show your hand to the camera ✋</div>
         )}
       </div>
 
-      {error && <p className="tryon-error">{error}</p>}
+      {error && <p className="tryon-error" role="alert">{error}</p>}
 
       <input
         ref={fileInputRef}

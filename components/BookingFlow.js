@@ -300,7 +300,7 @@ function BookingFlow({ open, initialService, onClose }) {
 
               {date && slots !== null && !offline && slotsError && (
                 <div className="bk-offline">
-                  <p>{slotsError}</p>
+                  <p role="alert">{slotsError}</p>
                   <button className="bk-primary whatsapp" onClick={whatsappHandoff}>
                     📱 Book on WhatsApp instead
                   </button>
@@ -378,7 +378,7 @@ function BookingFlow({ open, initialService, onClose }) {
                 />
               </label>
 
-              {submitError && <p className="bk-error">{submitError}</p>}
+              {submitError && <p className="bk-error" role="alert">{submitError}</p>}
 
               <button type="submit" className="bk-primary" disabled={submitting}>
                 {submitting ? 'Reserving your slot…' : '✨ Confirm my appointment'}
