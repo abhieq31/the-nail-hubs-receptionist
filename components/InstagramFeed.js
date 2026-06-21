@@ -81,7 +81,7 @@ function InstagramFeed() {
     <div className="ig-live-feed">
       {stories.length > 0 && (
         <div className="ig-stories">
-          <h4 className="ig-stories-title">✨ Today's Stories</h4>
+          <h4 className="ig-stories-title">✨ Today&rsquo;s Stories</h4>
           <div className="ig-stories-row">
             {stories.map((story) => (
               <button

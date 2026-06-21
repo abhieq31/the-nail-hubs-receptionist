@@ -383,7 +383,7 @@ function BookingFlow({ open, initialService, onClose }) {
               <button type="submit" className="bk-primary" disabled={submitting}>
                 {submitting ? 'Reserving your slot…' : '✨ Confirm my appointment'}
               </button>
-              <p className="bk-fine">Free to book · No advance payment · We'll see you there 💛</p>
+              <p className="bk-fine">Free to book · No advance payment · We&rsquo;ll see you there 💛</p>
             </form>
           )}
 
@@ -391,7 +391,7 @@ function BookingFlow({ open, initialService, onClose }) {
           {confirmed && (
             <div className="bk-success">
               <div className="bk-success-burst" aria-hidden="true">🎉</div>
-              <h3>You're booked, {confirmed.customer_name.split(' ')[0]}!</h3>
+              <h3>You&rsquo;re booked, {confirmed.customer_name.split(' ')[0]}!</h3>
               <div className="bk-summary-card success">
                 <span className="bk-summary-icon">{svcInfo?.icon}</span>
                 <div>

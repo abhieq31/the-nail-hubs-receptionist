@@ -26,13 +26,13 @@ function Navbar() {
         </button>
 
         <ul className={`nav-menu ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
-          <li><a href="/#home" onClick={closeMenu}>Home</a></li>
-          <li><a href="/#services" onClick={closeMenu}>Services</a></li>
+          <li><Link href="/#home" onClick={closeMenu}>Home</Link></li>
+          <li><Link href="/#services" onClick={closeMenu}>Services</Link></li>
           <li><Link href="/try-on" className="nav-tryon-link" onClick={closeMenu}>✨ AI Try-On</Link></li>
-          <li><a href="/#gallery" onClick={closeMenu}>Gallery</a></li>
-          <li><a href="/#reviews" onClick={closeMenu}>Reviews</a></li>
-          <li><a href="/#about" onClick={closeMenu}>About</a></li>
-          <li><a href="/#contact" onClick={closeMenu}>Contact</a></li>
+          <li><Link href="/#gallery" onClick={closeMenu}>Gallery</Link></li>
+          <li><Link href="/#reviews" onClick={closeMenu}>Reviews</Link></li>
+          <li><Link href="/#about" onClick={closeMenu}>About</Link></li>
+          <li><Link href="/#contact" onClick={closeMenu}>Contact</Link></li>
           <li>
             <button className="nav-book-btn" onClick={() => { openBooking(); closeMenu(); }}>
               💅 Book Now

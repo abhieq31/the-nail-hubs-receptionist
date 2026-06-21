@@ -18,11 +18,11 @@ function Footer() {
             <div className="footer-column">
               <h4>Quick Links</h4>
               <ul>
-                <li><a href="/#home">🏠 Home</a></li>
-                <li><a href="/#services">💅 Services</a></li>
+                <li><Link href="/#home">🏠 Home</Link></li>
+                <li><Link href="/#services">💅 Services</Link></li>
                 <li><Link href="/try-on">✨ AI Try-On Studio</Link></li>
-                <li><a href="/#gallery">📸 Gallery</a></li>
-                <li><a href="/#about">ℹ️ About</a></li>
+                <li><Link href="/#gallery">📸 Gallery</Link></li>
+                <li><Link href="/#about">ℹ️ About</Link></li>
               </ul>
             </div>
 

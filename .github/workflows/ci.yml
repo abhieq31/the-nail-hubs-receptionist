@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint-test-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run lint
+
+      - run: npm test
+
+      - run: npm run build
+        env:
+          # Booking endpoints intentionally degrade to 503 without these —
+          # the build only needs to succeed, not talk to a real database.
+          NEXT_PUBLIC_SUPABASE_URL: ''
+          SUPABASE_SERVICE_ROLE_KEY: ''

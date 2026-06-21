@@ -2,11 +2,30 @@
   "name": "the-nail-hubs",
   "version": "2.0.0",
   "private": true,
+  "description": "Production booking platform for a nail salon — Next.js + Supabase booking engine with a database-level no-double-booking guarantee, an on-device AI virtual nail try-on studio (MediaPipe hand tracking, zero server cost), and a scripted 24/7 chat receptionist.",
+  "author": "Abhi Patel",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abhieq31/the-nail-hubs-receptionist.git"
+  },
+  "homepage": "https://thenailhubs.vercel.app",
+  "keywords": [
+    "nextjs",
+    "supabase",
+    "mediapipe",
+    "computer-vision",
+    "booking-system",
+    "vercel"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@mediapipe/tasks-vision": "^0.10.22",
@@ -15,5 +34,11 @@
     "next": "^15.3.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^4.1.9",
+    "eslint": "^9.39.4",
+    "eslint-config-next": "^15.5.19",
+    "vitest": "^4.1.9"
   }
 }

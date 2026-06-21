@@ -1,75 +1,52 @@
-# 💅 The Nail Hubs — Luxury Salon Web App
+# 💅 The Nail Hubs
 
-A zero-maintenance, zero-cost web app for **The Nail Hubs**, Ankleshwar's
-premier luxury nail salon. Built once, lives forever: Next.js on Vercel's
-free tier, Supabase Postgres free tier, and AI that runs on the visitor's
-own device.
+**A production booking platform with a database-level concurrency guarantee, an on-device computer-vision AR feature, and a zero-marginal-cost architecture — built and deployed for a real, currently-operating business.**
 
-> **Launching it?** Follow [SETUP.md](SETUP.md) — 15 minutes, ₹0.
+[![CI](https://github.com/abhieq31/the-nail-hubs-receptionist/actions/workflows/ci.yml/badge.svg)](https://github.com/abhieq31/the-nail-hubs-receptionist/actions/workflows/ci.yml)
+[![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev)
+[![Supabase](https://img.shields.io/badge/Supabase-Postgres-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com)
+[![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?logo=vercel)](https://vercel.com)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-## Highlights
+**[🔗 Live site](https://thenailhubs.vercel.app)** · **[✨ Try the AI nail studio](https://thenailhubs.vercel.app/try-on)**
 
-### ✨ AI Virtual Nail Try-On Studio (`/try-on`)
-The signature feature — nowhere else in the industry's local market:
-- Visitors point their **camera at their own hand** and see nail colours,
-  shapes (almond / square / coffin / stiletto), finishes (glossy / matte /
-  chrome / glitter / french) and lengths rendered on their real fingertips
-  **live**
-- Powered by MediaPipe hand-landmark tracking (21 points per hand) running
-  **entirely in the browser** via WebGPU/WASM — heavy compute, zero server
-  cost, works at any scale for free
-- 100% private: no photo or video ever leaves the device
-- One tap to **save/share the look** or **book it on WhatsApp** with the
-  design details pre-filled
+---
 
-### 💬 24/7 AI Receptionist
-- Books appointments end-to-end in chat: service → live availability →
-  date & time → confirmed with an ID, straight into the database
-- Customers manage their own bookings: lookup, reschedule, cancel by
-  confirmation ID
-- Answers services, pricing, FAQs, location, nail-care tips
-- Falls back to WhatsApp booking automatically if the database isn't
-  reachable — the chat never dead-ends
+This started as a website for a real Ankleshwar, India nail salon — it now runs the salon's actual booking calendar in production. The interesting engineering is in three places: a booking engine that's *provably* free of double-bookings under concurrent writes, a hand-tracking AR effect that runs entirely in the visitor's browser at zero server cost, and a UI that degrades gracefully instead of breaking whenever a dependency (database, Instagram API, Google Places) isn't configured or is unreachable.
 
-### 📅 Bulletproof booking engine
-- Availability computed in the salon's timezone (IST) with service-specific
-  durations, 10-minute buffers, same-day lead time, and a 30-day window
-- **Double bookings are physically impossible**: a Postgres exclusion
-  constraint rejects overlapping confirmed appointments even under
-  simultaneous requests
-- Row Level Security on: only the site's own API can touch the data
+## Engineering highlights
 
-### 📸 Instagram-first, keyless by design
-- Gallery, reels and profile embeds work with **no API keys**
-- If an Instagram token is ever added, the site automatically upgrades to
-  native latest posts + stories (cached, rate-limit safe)
-- Same pattern for Google reviews: curated 5-star testimonials by default,
-  live Google reviews if a Places key is added
+**Concurrency-safe booking, enforced by the database — not application code.**
+The naive way to prevent double bookings is "check for a conflict, then insert" in your API handler — which is a textbook race condition under concurrent requests. Instead, [`supabase/schema.sql`](supabase/schema.sql) defines a Postgres `EXCLUDE` constraint over a GiST index on `(date, time-range)`: two overlapping confirmed appointments on the same day *cannot* exist in the table, full stop, even if two requests hit the insert at the same instant. The application-level [availability engine](lib/availability.js) computes slots for a snappy UI, but the database is the actual source of truth — a `23P01` constraint violation on insert is caught and turned into a clean "that slot was just taken" response ([`app/api/book/route.js`](app/api/book/route.js)).
 
-### 📈 Built-in growth engine
-- **Local SEO**: `NailSalon` structured data (hours, geo, services), sitemap,
-  robots, canonical URLs — built to own "nail salon Ankleshwar" searches
-- **Beautiful link shares**: a dynamically generated OpenGraph card, so the
-  site looks premium every time it's shared on WhatsApp or Instagram
-- **Live urgency, honestly**: the hero shows real open/closed status and the
-  next genuinely free slot today, straight from the booking engine
-- **Mobile-first conversion**: sticky Book/WhatsApp bar for Instagram traffic
-- **Customers as distribution**: try-on captures carry an elegant
-  @thenailhubs watermark, and every confirmed booking offers one-tap
-  "Invite a Friend" WhatsApp sharing plus an add-to-calendar invite
-  (fewer no-shows = more real capacity)
+**On-device computer vision, not a server-side ML pipeline.**
+The [AI Try-On Studio](components/TryOnStudio.js) runs MediaPipe's hand-landmark model (21 points/hand) client-side via WASM, tracks fingertips through `getUserMedia`, and procedurally renders 4 nail shapes × 5 finishes (16 colours) onto a `<canvas>` every frame — chrome's multi-band metallic gradient, glitter with deterministically-seeded sparkle positions (so it doesn't strobe), and an exponential-moving-average smoothing pass over the landmarks (raw model output flickers slightly frame-to-frame, which reads as the whole overlay vibrating). The model and WASM runtime are **self-hosted** in [`public/mediapipe/`](public/mediapipe) rather than pulled from a third-party CDN, after diagnosing that CDN latency/blocking on mobile networks was the #1 cause of load failures in production. No frame ever leaves the device — zero inference cost, full privacy, scales to any traffic for free.
+
+**Resilience by default, not by exception handling.**
+Every external dependency degrades instead of breaking the page: no Supabase configured → booking API returns 503 and the chat receptionist hands off to a pre-filled WhatsApp message instead of dead-ending; no Instagram token → the live feed falls back to the official profile embed; no Google Places key → curated 5-star testimonials stand in for live reviews. The site is designed to never show a broken feature, only a gracefully simpler one.
+
+**Security hardening done as a real pass, not an afterthought.**
+A production audit of this codebase found and fixed a real stored-XSS-shaped bug (chat messages were rendered via `dangerouslySetInnerHTML` with no escaping — see [`components/ChatWidget.js`](components/ChatWidget.js)), added best-effort per-IP rate limiting on every write endpoint and the confirmation-ID lookup (mitigating both spam bookings and ID enumeration — [`lib/rateLimit.js`](lib/rateLimit.js)), and added baseline security headers (`next.config.mjs`).
+
+**SEO and growth mechanics, not just a landing page.** `NailSalon` JSON-LD structured data (hours, geo-coordinates, services) so Google can render the business directly in search results; a sitemap/robots pair; and an Open Graph card generated at *build time* via `@vercel/og` ([`app/opengraph-image.js`](app/opengraph-image.js)) so every WhatsApp/Instagram share looks designed instead of showing a blank link preview.
+
+**Tested where it actually matters.** The booking math, time/timezone handling, rate limiter, and the two external-API integration layers have **49 unit tests at ~85% line coverage** (`npm test`) — see [Testing](#testing) below. UI components are intentionally left untested in favor of testing the logic that would actually cause an incorrect booking or a security bug if it broke.
 
 ## Tech Stack
 
 | Layer | Choice | Why |
 |-------|--------|-----|
-| Framework | Next.js 15 (App Router) | One repo, one deploy: UI + API routes together, no CORS, free on Vercel |
+| Framework | Next.js 15 (App Router) | UI + API routes in one deploy, no CORS, generous free tier on Vercel |
 | UI | React 19 | — |
-| Database | Supabase (Postgres) | Free tier, persistent, exclusion constraints for booking integrity |
-| AI/ML | MediaPipe Tasks Vision | On-device hand tracking — free at any scale, private |
+| Database | Supabase (Postgres) | Free tier, `EXCLUDE` constraint support for real concurrency guarantees |
+| Computer Vision | MediaPipe Tasks Vision (self-hosted) | On-device hand tracking — free at any scale, fully private |
+| Testing | Vitest | Fast, ESM-native, zero-config with Next.js |
+| CI | GitHub Actions | Lint + test + build on every push |
 | Analytics | Vercel Analytics | Free tier |
+| Hosting | Vercel | Zero-config Next.js deploys, free tier |
 
-## Project Structure
+## Architecture
 
 ```
 app/
@@ -83,12 +60,14 @@ app/
     └── google/reviews/
 
 components/               # Navbar, Hero, Services, Gallery, Reviews, About,
-                          # Contact, Footer, ChatWidget, ChatProvider,
+                          # Contact, Footer, ChatWidget, ChatProvider, BookingFlow,
                           # InstagramFeed, GoogleReviews, TryOnStudio, TryOnTeaser
 lib/                      # businessRules, availability engine, time (IST),
-                          # supabase client, integrations, client API helpers
+                          # supabase client, integrations, rate limiter, client API helpers
+                          # — *.test.js files sit next to the module they cover
 styles/                   # globals, chat, feeds, tryon (consistent gold/dark theme)
-supabase/schema.sql       # One-paste database setup
+supabase/schema.sql       # One-paste database setup, incl. the no-overlap constraint
+.github/workflows/ci.yml  # Lint, test, build on every push/PR
 SETUP.md                  # 15-minute launch guide
 ```
 
@@ -99,17 +78,32 @@ SETUP.md                  # 15-minute launch guide
 | `/api/services` | GET | Service menu with durations |
 | `/api/available-dates?days=7` | GET | Next open days (IST) |
 | `/api/availability` | POST | Open slots for a service + date |
-| `/api/book` | POST | Create appointment (409 on conflict) |
-| `/api/appointment/{id}` | GET | Lookup by confirmation ID |
-| `/api/reschedule` | POST | Move an appointment |
-| `/api/cancel` | POST | Cancel an appointment |
+| `/api/book` | POST | Create appointment (409 on conflict, rate-limited) |
+| `/api/appointment/{id}` | GET | Lookup by confirmation ID (rate-limited) |
+| `/api/reschedule` | POST | Move an appointment (rate-limited) |
+| `/api/cancel` | POST | Cancel an appointment (rate-limited) |
 | `/api/instagram/feed` · `/api/instagram/stories` | GET | Live IG content (optional token) |
 | `/api/google/reviews` | GET | Live Google reviews (optional key) |
 
+## Testing
+
+```bash
+npm test              # run the suite once
+npm run test:watch    # watch mode
+npm run test:coverage # coverage report
+```
+
+49 tests across the business-logic layer (`lib/*.test.js`):
+
+- **`availability.test.js`** — slot generation packs back-to-back with the configured buffer, never overruns closing time, excludes conflicting slots, and rejects bookings outside the working hours / advance-booking window / same-day lead time.
+- **`time.test.js`** — minute/time conversions round-trip correctly; date math is anchored at UTC noon specifically to avoid the off-by-one-day bug that timezone-naive date arithmetic produces.
+- **`businessRules.test.js`** — sanity-checks the single source of truth every other layer (UI, chat, API) reads from.
+- **`rateLimit.test.js`** — per-IP, per-scope windows that block over the limit and reset after the window, verified with mocked time.
+- **`clientApi.test.js` / `integrations.test.js`** — the fetch wrapper surfaces HTTP status + server error detail correctly, and the Instagram/Google integrations cache responses and degrade to `configured: false` instead of throwing when unset.
+
 ## Business Rules
 
-All in [`lib/businessRules.js`](lib/businessRules.js) — change once,
-applies to the website, the chat receptionist, and the booking engine:
+All in [`lib/businessRules.js`](lib/businessRules.js) — change once, applies to the website, the chat receptionist, the booking engine, and the test suite:
 
 - **Hours**: open all 7 days, 11:00 AM – 6:00 PM (Asia/Kolkata)
 - **Buffer**: 10 minutes between appointments
@@ -121,12 +115,17 @@ applies to the website, the chat receptionist, and the booking engine:
 ```bash
 npm install
 cp .env.example .env.local   # optional — site runs without it
-npm run dev
+npm run dev                  # http://localhost:3000
+npm test                     # run the test suite
+npm run lint                 # ESLint (next/core-web-vitals)
 ```
 
-Without Supabase configured, booking endpoints return 503 and the chat
-offers WhatsApp booking instead; everything else works.
+Without Supabase configured, booking endpoints return 503 and the chat offers WhatsApp booking instead; everything else works. Full launch guide for a fresh deploy: [SETUP.md](SETUP.md).
+
+## License
+
+[MIT](LICENSE) © Abhi Patel
 
 ---
 
-Made with 💅 in Ankleshwar · Women-owned · [@thenailhubs](https://www.instagram.com/thenailhubs/)
+Made with 💅 in Ankleshwar · Women-owned business · [@thenailhubs](https://www.instagram.com/thenailhubs/)
