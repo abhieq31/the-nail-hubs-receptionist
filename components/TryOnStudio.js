@@ -200,11 +200,13 @@ function drawNail(ctx, tipPx, dipPx, style, fingerIndex) {
   if (segment < 6) return; // hand too far away / bad landmark
 
   const angle = Math.atan2(dy, dx) + Math.PI / 2;
-  const w = segment * 0.92;
+  // A real nail is much narrower and shorter than the tip-to-knuckle segment —
+  // the old 0.92/1.7 sizing drew oversized "press-on talons" past the fingertip.
+  const w = segment * 0.5;
   const L = segment * style.length;
   // nail base sits a touch behind the fingertip landmark
-  const baseX = tipPx[0] - (dx / segment) * segment * 0.18;
-  const baseY = tipPx[1] - (dy / segment) * segment * 0.18;
+  const baseX = tipPx[0] - (dx / segment) * segment * 0.1;
+  const baseY = tipPx[1] - (dy / segment) * segment * 0.1;
 
   ctx.save();
   ctx.translate(baseX, baseY);
@@ -212,31 +214,47 @@ function drawNail(ctx, tipPx, dipPx, style, fingerIndex) {
 
   traceNail(ctx, style.shape, w, L);
 
+  // Soft contact shadow so the nail reads as resting on the finger rather
+  // than a flat sticker pasted on top of it — applied to the base fill only.
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+  ctx.shadowBlur = w * 0.3;
+  ctx.shadowOffsetY = w * 0.12;
+
   if (style.finish === 'french') {
-    ctx.fillStyle = 'rgba(244, 219, 208, 0.72)';
+    ctx.fillStyle = 'rgba(244, 219, 208, 0.85)';
     ctx.fill();
+    ctx.shadowColor = 'transparent';
     ctx.save();
     ctx.clip();
     ctx.fillStyle = rgba(style.color, 0.95);
     ctx.fillRect(-w, -L * 1.2, w * 2, L * 0.42);
     ctx.restore();
   } else if (style.finish === 'chrome') {
+    // Multiple light/dark bands read as a metallic mirror finish; a single
+    // soft gradient (the old version) just looked like a flat dark fill.
     const grad = ctx.createLinearGradient(-w / 2, 0, w / 2, -L);
-    grad.addColorStop(0, shade(style.color, 70));
-    grad.addColorStop(0.45, style.color);
-    grad.addColorStop(0.65, shade(style.color, -45));
-    grad.addColorStop(1, shade(style.color, 60));
+    grad.addColorStop(0, shade(style.color, 100));
+    grad.addColorStop(0.22, shade(style.color, 10));
+    grad.addColorStop(0.48, style.color);
+    grad.addColorStop(0.68, shade(style.color, -65));
+    grad.addColorStop(0.85, shade(style.color, 40));
+    grad.addColorStop(1, shade(style.color, 90));
     ctx.fillStyle = grad;
     ctx.fill();
+    ctx.shadowColor = 'transparent';
   } else {
-    ctx.fillStyle = rgba(style.color, style.finish === 'matte' ? 0.92 : 0.88);
+    ctx.fillStyle = rgba(style.color, style.finish === 'matte' ? 0.94 : 0.9);
     ctx.fill();
+    ctx.shadowColor = 'transparent';
   }
+  ctx.shadowBlur = 0;
+  ctx.shadowOffsetY = 0;
 
-  // subtle outline so nails read against any skin tone
+  // Thin, soft outline — just enough definition against any skin tone,
+  // without the hard cartoon edge of a thick solid stroke.
   traceNail(ctx, style.shape, w, L);
-  ctx.strokeStyle = rgba('#000000', 0.18);
-  ctx.lineWidth = Math.max(1, w * 0.04);
+  ctx.strokeStyle = rgba('#000000', 0.12);
+  ctx.lineWidth = Math.max(0.75, w * 0.025);
   ctx.stroke();
 
   if (style.finish === 'glitter') {
@@ -246,7 +264,7 @@ function drawNail(ctx, tipPx, dipPx, style, fingerIndex) {
     for (const [sx, sy] of SPARKLES[fingerIndex]) {
       const px = sx * (w / 2) * 0.85;
       const py = sy * L * 0.92;
-      const r = Math.max(0.6, w * 0.045);
+      const r = Math.max(0.6, w * 0.06);
       ctx.fillStyle = Math.abs(sx) > 0.5 ? 'rgba(255,255,255,0.85)' : 'rgba(255,230,160,0.9)';
       ctx.beginPath();
       ctx.arc(px, py, r, 0, Math.PI * 2);
@@ -255,14 +273,19 @@ function drawNail(ctx, tipPx, dipPx, style, fingerIndex) {
     ctx.restore();
   }
 
-  if (style.finish === 'glossy' || style.finish === 'glitter' || style.finish === 'french') {
-    // light reflection
+  if (style.finish === 'glossy' || style.finish === 'glitter' || style.finish === 'french' || style.finish === 'chrome') {
+    // Wet-polish highlight: a soft broad sheen plus a small crisp specular
+    // dot — one alone reads as flat, the pair reads as "shiny".
     ctx.save();
     traceNail(ctx, style.shape, w, L);
     ctx.clip();
-    ctx.fillStyle = 'rgba(255,255,255,0.32)';
+    ctx.fillStyle = 'rgba(255,255,255,0.38)';
     ctx.beginPath();
-    ctx.ellipse(-w * 0.18, -L * 0.62, w * 0.14, L * 0.26, -0.35, 0, Math.PI * 2);
+    ctx.ellipse(-w * 0.16, -L * 0.6, w * 0.13, L * 0.24, -0.35, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.8)';
+    ctx.beginPath();
+    ctx.ellipse(-w * 0.2, -L * 0.68, w * 0.045, L * 0.06, -0.35, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
   }
@@ -286,6 +309,23 @@ function drawHands(ctx, landmarks, width, height, style) {
   }
 }
 
+// Exponential moving average over landmark positions between frames — raw
+// MediaPipe output flickers slightly frame to frame, which reads as the
+// whole nail "vibrating" on a live feed. This trades a few ms of lag for a
+// steady, premium-feeling overlay.
+function smoothHands(rawHands, prevHands, alpha = 0.5) {
+  if (!prevHands || prevHands.length !== rawHands.length) {
+    return rawHands.map((hand) => hand.map((p) => ({ x: p.x, y: p.y })));
+  }
+  return rawHands.map((hand, hi) =>
+    hand.map((p, li) => {
+      const prev = prevHands[hi]?.[li];
+      if (!prev) return { x: p.x, y: p.y };
+      return { x: prev.x * alpha + p.x * (1 - alpha), y: prev.y * alpha + p.y * (1 - alpha) };
+    })
+  );
+}
+
 function TryOnStudio() {
   const [mode, setMode] = useState('idle'); // idle | camera | photo
   const [status, setStatus] = useState('');
@@ -294,7 +334,7 @@ function TryOnStudio() {
   const [color, setColor] = useState(COLORS[0].hex);
   const [shape, setShape] = useState('almond');
   const [finish, setFinish] = useState('glossy');
-  const [length, setLength] = useState(1.15);
+  const [length, setLength] = useState(0.78);
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -304,6 +344,7 @@ function TryOnStudio() {
   const rafRef = useRef(null);
   const streamRef = useRef(null);
   const mirroredRef = useRef(true);
+  const smoothedHandsRef = useRef([]);
   const photoRef = useRef(null); // { bitmap, landmarks }
   const styleRef = useRef({ color, shape, finish, length });
 
@@ -407,6 +448,7 @@ function TryOnStudio() {
       await video.play();
 
       setStatus('');
+      smoothedHandsRef.current = [];
       let lastVideoTime = -1;
       let lastResult = null;
 
@@ -437,7 +479,9 @@ function TryOnStudio() {
           ctx.scale(-1, 1);
         }
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const hands = lastResult?.landmarks || [];
+        const rawHands = lastResult?.landmarks || [];
+        const hands = smoothHands(rawHands, smoothedHandsRef.current);
+        smoothedHandsRef.current = hands;
         setHandVisible(hands.length > 0);
         drawHands(ctx, hands, canvas.width, canvas.height, styleRef.current);
         ctx.restore();
@@ -669,8 +713,8 @@ function TryOnStudio() {
           <h4>Length</h4>
           <input
             type="range"
-            min="0.8"
-            max="1.7"
+            min="0.55"
+            max="1.25"
             step="0.05"
             value={length}
             onChange={(e) => setLength(Number(e.target.value))}
