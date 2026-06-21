@@ -9,11 +9,17 @@
 [![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?logo=vercel)](https://vercel.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**[🔗 Live site](https://thenailhubs.vercel.app)** · **[✨ Try the AI nail studio](https://thenailhubs.vercel.app/try-on)**
+**[🔗 Live site](https://thenailhubs.vercel.app)** · **[✨ Try the AR nail studio](https://thenailhubs.vercel.app/try-on)** (branded "AI Try-On Studio" for customers; under the hood it's computer vision, not generative AI)
 
 ---
 
 This started as a website for a real Ankleshwar, India nail salon — it now runs the salon's actual booking calendar in production. The interesting engineering is in three places: a booking engine that's *provably* free of double-bookings under concurrent writes, a hand-tracking AR effect that runs entirely in the visitor's browser at zero server cost, and a UI that degrades gracefully instead of breaking whenever a dependency (database, Instagram API, Google Places) isn't configured or is unreachable.
+
+## Status
+
+Live and serving a real, single-location business — not a portfolio demo. The original prototype shipped January 2026; the current architecture (the Supabase-backed booking engine with the concurrency guarantee, the AR try-on studio, the test suite, CI) replaced it on **June 11, 2026**, after the original booking logic was identified as having a race-condition risk under concurrent requests.
+
+There's no analytics dashboard wired up for appointment volume, so rather than invent a number, here's the actual claim: the no-double-booking guarantee is enforced by a database constraint, not by application code that depends on enough traffic "happening to" exercise the race condition correctly. It's correct by construction from the first booking onward — that's a stronger property than an error count with no incidents in it, and it doesn't need a few months of production traffic to become true.
 
 ## Engineering highlights
 
@@ -21,7 +27,7 @@ This started as a website for a real Ankleshwar, India nail salon — it now run
 The naive way to prevent double bookings is "check for a conflict, then insert" in your API handler — which is a textbook race condition under concurrent requests. Instead, [`supabase/schema.sql`](supabase/schema.sql) defines a Postgres `EXCLUDE` constraint over a GiST index on `(date, time-range)`: two overlapping confirmed appointments on the same day *cannot* exist in the table, full stop, even if two requests hit the insert at the same instant. The application-level [availability engine](lib/availability.js) computes slots for a snappy UI, but the database is the actual source of truth — a `23P01` constraint violation on insert is caught and turned into a clean "that slot was just taken" response ([`app/api/book/route.js`](app/api/book/route.js)).
 
 **On-device computer vision, not a server-side ML pipeline.**
-The [AI Try-On Studio](components/TryOnStudio.js) runs MediaPipe's hand-landmark model (21 points/hand) client-side via WASM, tracks fingertips through `getUserMedia`, and procedurally renders 4 nail shapes × 5 finishes (16 colours) onto a `<canvas>` every frame — chrome's multi-band metallic gradient, glitter with deterministically-seeded sparkle positions (so it doesn't strobe), and an exponential-moving-average smoothing pass over the landmarks (raw model output flickers slightly frame-to-frame, which reads as the whole overlay vibrating). The model and WASM runtime are **self-hosted** in [`public/mediapipe/`](public/mediapipe) rather than pulled from a third-party CDN, after diagnosing that CDN latency/blocking on mobile networks was the #1 cause of load failures in production. No frame ever leaves the device — zero inference cost, full privacy, scales to any traffic for free.
+The [Try-On Studio](components/TryOnStudio.js) — customer-facing branding calls it "AI," but it's specifically computer vision, not a generative model — runs MediaPipe's hand-landmark detection (21 points/hand) client-side via WASM, tracks fingertips through `getUserMedia`, and procedurally renders 4 nail shapes × 5 finishes (16 colours) onto a `<canvas>` every frame — chrome's multi-band metallic gradient, glitter with deterministically-seeded sparkle positions (so it doesn't strobe), and an exponential-moving-average smoothing pass over the landmarks (raw model output flickers slightly frame-to-frame, which reads as the whole overlay vibrating). The model and WASM runtime are **self-hosted** in [`public/mediapipe/`](public/mediapipe) rather than pulled from a third-party CDN, after diagnosing that CDN latency/blocking on mobile networks was the #1 cause of load failures in production. No frame ever leaves the device — zero inference cost, full privacy, scales to any traffic for free.
 
 **Resilience by default, not by exception handling.**
 Every external dependency degrades instead of breaking the page: no Supabase configured → booking API returns 503 and the chat receptionist hands off to a pre-filled WhatsApp message instead of dead-ending; no Instagram token → the live feed falls back to the official profile embed; no Google Places key → curated 5-star testimonials stand in for live reviews. The site is designed to never show a broken feature, only a gracefully simpler one.
@@ -51,7 +57,7 @@ A production audit of this codebase found and fixed a real stored-XSS-shaped bug
 ```
 app/
 ├── page.js               # Home (hero, try-on teaser, services, gallery, reviews, about, contact)
-├── try-on/page.js        # AI Virtual Try-On Studio
+├── try-on/page.js        # Computer-vision AR nail Try-On Studio
 ├── layout.js             # Root layout, metadata, global chat receptionist
 └── api/                  # Booking + integrations API (Next.js route handlers)
     ├── services/  available-dates/  availability/
