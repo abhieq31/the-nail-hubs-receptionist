@@ -2652,3 +2652,352 @@ h1, h2, h3, h4,
     grid-template-columns: 1fr;
   }
 }
+
+/* ══════════════════════════════════════════════════════════════════
+   Mobile compact pass — the original mobile rules above kept desktop
+   font sizes/padding almost everywhere (e.g. services/gallery sections
+   still used the 100px desktop padding, buttons kept 1.1rem text),
+   which read as oversized on an actual phone. This tightens type,
+   icons and spacing specifically for phones while keeping every tap
+   target at/above the 44px accessibility minimum.
+   ══════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  /* Sections: 100px of top+bottom padding ate a third of the viewport */
+  .services-section,
+  .gallery-section,
+  .about-section,
+  .contact-section,
+  .reviews-section {
+    padding: 44px 0;
+  }
+
+  .section-header {
+    margin-bottom: 32px;
+  }
+
+  .section-title {
+    font-size: 1.55rem;
+  }
+
+  .section-title::after {
+    width: 42px;
+    height: 3px;
+  }
+
+  .section-subtitle {
+    font-size: 0.9rem;
+  }
+
+  /* Hero */
+  .hero-content {
+    padding: 20px 16px;
+  }
+
+  .hero-title {
+    font-size: 1.85rem;
+    gap: 2px;
+  }
+
+  .at-text {
+    font-size: 1.15rem;
+  }
+
+  .hero-subtitle {
+    font-size: 0.96rem;
+    margin-bottom: 22px;
+  }
+
+  .hero-buttons {
+    gap: 10px;
+    margin-bottom: 32px;
+  }
+
+  .btn-primary, .btn-secondary, .btn-whatsapp {
+    padding: 13px 22px;
+    font-size: 0.92rem;
+    min-height: 46px;
+  }
+
+  .hero-buttons .btn-primary {
+    font-size: 0.96rem;
+  }
+
+  .hero-features {
+    gap: 8px;
+    margin-bottom: 48px;
+  }
+
+  .feature-item {
+    font-size: 0.82rem;
+    padding: 8px 16px;
+    gap: 8px;
+  }
+
+  .feature-icon {
+    font-size: 1.05rem;
+  }
+
+  /* Service cards */
+  .service-card {
+    padding: 22px 18px;
+  }
+
+  .service-icon {
+    font-size: 2.1rem;
+    margin-bottom: 10px;
+  }
+
+  .service-card h3 {
+    font-size: 1.15rem;
+    margin-bottom: 6px;
+  }
+
+  .service-duration {
+    font-size: 0.88rem;
+    margin-bottom: 8px;
+  }
+
+  .service-description {
+    font-size: 0.85rem;
+    margin-bottom: 12px;
+  }
+
+  .service-features {
+    margin-bottom: 16px;
+  }
+
+  .service-features li {
+    font-size: 0.82rem;
+    padding: 4px 0 4px 20px;
+  }
+
+  .service-book-btn {
+    padding: 11px;
+    font-size: 0.88rem;
+  }
+
+  /* Instagram showcase */
+  .instagram-header {
+    padding: 20px 16px;
+  }
+
+  .instagram-avatar {
+    width: 56px;
+    height: 56px;
+  }
+
+  .instagram-username {
+    font-size: 1.2rem;
+  }
+
+  .instagram-tagline {
+    font-size: 0.8rem;
+  }
+
+  .follow-btn {
+    padding: 10px 18px;
+    font-size: 0.85rem;
+  }
+
+  .instagram-embed-container {
+    padding: 18px 14px;
+  }
+
+  .embed-text {
+    font-size: 0.92rem;
+  }
+
+  .feature-card {
+    padding: 16px;
+    min-height: auto;
+  }
+
+  .feature-icon-box {
+    font-size: 1.7rem;
+    margin-bottom: 8px;
+  }
+
+  .feature-card h4 {
+    font-size: 0.9rem;
+  }
+
+  .feature-card p {
+    font-size: 0.78rem;
+  }
+
+  /* About */
+  .women-owned-badge {
+    padding: 8px 16px;
+    margin-bottom: 16px;
+    gap: 8px;
+  }
+
+  .badge-icon {
+    font-size: 1.05rem;
+  }
+
+  .badge-text {
+    font-size: 0.8rem;
+  }
+
+  .about-description {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-bottom: 12px;
+  }
+
+  .about-highlights {
+    margin: 28px 0;
+  }
+
+  .highlight-item {
+    padding: 16px 10px;
+  }
+
+  .highlight-number {
+    font-size: 1.6rem;
+    margin-bottom: 4px;
+  }
+
+  .highlight-label {
+    font-size: 0.72rem;
+  }
+
+  .why-choose {
+    margin-top: 28px;
+  }
+
+  .why-choose h3 {
+    font-size: 1.2rem;
+    margin-bottom: 14px;
+  }
+
+  .why-list li {
+    font-size: 0.88rem;
+    gap: 10px;
+    padding: 6px 0;
+  }
+
+  /* Contact */
+  .contact-card {
+    padding: 16px;
+  }
+
+  .contact-icon {
+    font-size: 1.7rem;
+    margin-bottom: 8px;
+  }
+
+  .contact-card h3 {
+    font-size: 1.02rem;
+    margin-bottom: 6px;
+  }
+
+  .contact-card p {
+    font-size: 0.83rem;
+    margin: 3px 0;
+  }
+
+  .contact-book-btn {
+    padding: 10px 22px;
+    font-size: 0.85rem;
+  }
+
+  /* Reviews */
+  .reviews-header {
+    padding: 20px 16px;
+  }
+
+  .reviews-rating .star-icon {
+    font-size: 1.7rem;
+  }
+
+  .reviews-rating h3 {
+    font-size: 1.4rem;
+  }
+
+  .reviews-rating p {
+    font-size: 0.85rem;
+  }
+
+  .testimonials-header {
+    padding: 18px 14px;
+    margin: 28px 0 18px;
+  }
+
+  .testimonials-header h3 {
+    font-size: 1.25rem;
+  }
+
+  .testimonials-header p {
+    font-size: 0.85rem;
+  }
+
+  .review-card {
+    padding: 18px;
+  }
+
+  .review-stars {
+    font-size: 1.4rem;
+    margin-bottom: 14px;
+  }
+
+  .review-text {
+    font-size: 0.9rem;
+  }
+
+  .review-cta {
+    padding: 28px 18px;
+  }
+
+  .review-cta h3 {
+    font-size: 1.4rem;
+  }
+
+  .review-cta p {
+    font-size: 0.92rem;
+  }
+
+  .review-btn {
+    padding: 13px 28px;
+    font-size: 0.92rem;
+  }
+
+  /* Footer */
+  .footer {
+    padding: 36px 0 16px;
+  }
+
+  .footer-logo-image {
+    height: 44px;
+  }
+
+  .footer-brand p {
+    font-size: 0.85rem;
+  }
+
+  .footer-column h4 {
+    font-size: 0.98rem;
+    margin-bottom: 14px;
+  }
+
+  .footer-column li {
+    font-size: 0.85rem;
+    margin-bottom: 10px;
+  }
+
+  /* Floating chat button + navbar */
+  .floating-book-button {
+    padding: 13px 20px;
+    font-size: 0.88rem;
+    gap: 8px;
+  }
+
+  .book-icon {
+    font-size: 1.15rem;
+  }
+
+  .salon-name {
+    font-size: 0.92rem;
+  }
+}
